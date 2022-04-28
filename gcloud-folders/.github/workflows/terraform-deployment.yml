@@ -1,0 +1,77 @@
+name: 'Cloud Deployment'
+
+on:
+  push:
+    branches:
+    - main
+
+env:
+  STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.SERVICE_ACCOUNT }}
+
+# OR SET MANUALLY
+#env:
+#  STATE_BUCKET: 'XXXX'
+#  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
+#  SERVICE_ACCOUNT: 'XXXX@XXXX'
+
+jobs:
+
+  terraform:
+    name: 'terraform'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+          
+    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+    - name: Terraform Init
+      run: |
+        terraform init \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY" \
+
+    # Checks that all Terraform configuration files adhere to a canonical format
+    #- name: Terraform Format
+    #  run: terraform fmt -check
+
+    # Generates an execution plan for Terraform
+    - name: Terraform Plan
+      run: terraform plan
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
+      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: terraform apply -auto-approve
+
+ 
