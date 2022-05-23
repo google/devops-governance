@@ -4,7 +4,9 @@ This is a template for an IaC kickstarter repository.
 
 ![Skunkworks](https://user-images.githubusercontent.com/94000358/169810982-36f01de2-e5e5-4ecd-b98e-3cf5a6aa9f81.png)
 
-The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. This template creates a bucket in the specified target environment.
+The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. 
+
+This template creates a bucket in the specified target environment.
 
 ## Repository Configuration
 This repository does not need any additional runners (uses Github runners) and does require you to previously setup Workload Identity Federation to authenticate.
