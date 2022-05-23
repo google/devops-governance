@@ -16,9 +16,15 @@ DevOps governance will give infrastructure teams the required flexibility whilst
 
 ## Guardrail Examples
 
--   [Folder Factory](gcloud-folders)
+To demonstrate how to enforce guardrails in Google Cloud we provide the Guardrail Examples:
 
--   [Project Factory](gcloud-projects)
+![Guardrail Examples](https://user-images.githubusercontent.com/94000358/169811919-e5c36181-c1d2-4339-8103-d86640e9a1f1.png)
+
+-   The [Folder Factory](/examples/guardrails/folder-factory) sets guardrails in the form of organisational policies on folders.
+
+-   The [Project Factory](/examples/guardrails/project-factory) sets up projects for teams. For this it creates a deployment service account, links this to a Github repository and defines the roles and permissions that the deployment service account has. 
+
+-   The [Skunkworks - IaC Kickstarter](/examples/guardrails/skunkworks) is a template that can be used to give any new teams a functioning IaC deployment pipeline and repository structure.
 
 ## Disclaimer
 

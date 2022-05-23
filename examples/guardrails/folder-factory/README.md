@@ -1,10 +1,10 @@
-# gcloud-folders
+# Folder Factory
 
 This is a template for a DevOps folder factory.
 
-It can be used with https://github.com/devops-governance/gcloud-projects and is intended to house the folder configurations:
+It can be used with [https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory](https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory) and is intended to house the folder configurations:
 
-<img width="1453" alt="Screen Shot 2022-04-04 at 15 17 43" src="https://user-images.githubusercontent.com/94000358/161552381-1b0b0f56-4b49-428e-966e-66ad19914400.png">
+![Screenshot 2022-05-10 12 00 19 PM](https://user-images.githubusercontent.com/94000358/169809437-aaa8538e-3ffc-48b3-9028-84e4995de150.png)
 
 Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
 
@@ -17,7 +17,7 @@ If you do require additional assitance to setup Workload Identity Federation hav
 
 After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
 
-<img width="787" alt="Screen Shot 2022-04-04 at 12 42 56" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
+<img width="787" alt="Secret configuration" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
 
 or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
 ```
