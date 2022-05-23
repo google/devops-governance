@@ -1,4 +1,4 @@
-# Folder factory
+# Folder Factory
 
 This is a template for a DevOps folder factory.
 
