@@ -1,14 +1,14 @@
-# gcloud-projects
+# Project Factory
 
 This is a template for a DevOps project factory.
 
-It can be used with https://github.com/devops-governance/gcloud-folders and is intended to house the projects of a specified folder:
+It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory) and is intended to house the projects of a specified folder:
 
-<img width="1466" alt="Screen Shot 2022-04-04 at 13 05 04" src="https://user-images.githubusercontent.com/94000358/161531177-23a99468-1e7b-4583-a243-624ee4663506.png">
+<img width="1466" alt="Overview" src="https://user-images.githubusercontent.com/94000358/161531177-23a99468-1e7b-4583-a243-624ee4663506.png">
 
 Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
 
-<img width="1453" alt="The current repository has been highlighted." src="https://user-images.githubusercontent.com/94000358/161534721-8b4566b3-ae39-4f47-9d40-706371d4e263.png">
+![Folder Factory](https://user-images.githubusercontent.com/94000358/169809882-f5ff9fb1-d037-49de-8c2c-bf0d457b662f.png)
 
 The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github.
 
@@ -19,7 +19,7 @@ If you do require additional assitance to setup Workload Identity Federation hav
 
 After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
 
-<img width="785" alt="Screen Shot 2022-04-04 at 12 43 37" src="https://user-images.githubusercontent.com/94000358/161528557-41446670-1e3b-4ea1-996d-e377e53d9c43.png">
+<img width="785" alt="Secret settings" src="https://user-images.githubusercontent.com/94000358/161528557-41446670-1e3b-4ea1-996d-e377e53d9c43.png">
 
 or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
 ```
