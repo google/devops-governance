@@ -16,9 +16,11 @@ DevOps governance will give infrastructure teams the required flexibility whilst
 
 ## Guardrail Examples
 
--   [Folder Factory](gcloud-folders)
+-   [Folder Factory](/examples/guardrails/folder-factory)
 
--   [Project Factory](gcloud-projects)
+-   [Project Factory](/examples/guardrails/project-factory)
+
+-   [Skunkworks - IaC Kickstarter](/examples/guardrails/skunkworks)
 
 ## Disclaimer
 
