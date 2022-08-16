@@ -16,13 +16,13 @@
 
 module "secret-manager" {
   source     = "./modules/secret-manager"
-  project_id = ${var.project}
+  project_id = var.project
   secrets    = {
     devops-governance   = null
   }
   versions = {
     devops-governance = {
-      v1 = { enabled = true, data = ${var.secret}}
+      v1 = { enabled = true, data = var.secret }
     }
   }
 }
