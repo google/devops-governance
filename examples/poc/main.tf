@@ -18,7 +18,7 @@ module "secret-manager" {
   source     = "./modules/secret-manager"
   project_id = var.project
   secrets    = {
-    devops-governance   = null
+    devops-governance = null
   }
   versions = {
     devops-governance = {
