@@ -94,7 +94,7 @@ jobs:
         terraform init \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" 
-        terraform plan -var "access_token=${{ steps.auth.outputs.access_token }}" -out tfplan.plan
+        terraform plan -out tfplan.plan
     - name: 'Save Plan'
       uses: actions/upload-artifact@v2
       with:
