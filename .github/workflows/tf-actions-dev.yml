@@ -12,87 +12,113 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'DEV Deployment'
 
+name: DEV Environment POC
 on:
   push:
     branches:
-    - poc-dev
-
+      - dev-poc
 env:
   STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
-  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-  SERVICE_ACCOUNT: ${{ secrets.DEV_SERVICE_ACCOUNT }}
-  TF_VAR_project: ${{ secrets.DEV_PROJECT }}
-
-# OR SET MANUALLY
-#env:
-#  STATE_BUCKET: 'XXXX'
-#  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-#  SERVICE_ACCOUNT: 'XXXX@XXXX'
-#  TF_VAR_project: 'XXXXXXX'
+  workload_identity_provider: 'projects/110275740506/locations/global/workloadIdentityPools/github-pool/providers/github'
+  service_account: 'dev-service-account@devops-governance-dev.iam.gserviceaccount.com'
+  TF_VAR_project: ' devops-governance-dev'
 
 jobs:
-
-  terraform:
-    name: 'terraform'
-    runs-on: ubuntu-latest
-    environment: production
-    
+  # Validate
+  validate:
+    # The type of runner that the job will run on
+    runs-on: self-hosted
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
       id-token: 'write'
-
-    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
-    defaults:
-      run:
-        shell: bash
-
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checkout the repository to the GitHub Actions runner
-    - name: Checkout
-      uses: actions/checkout@v3
-      
+    - uses: 'actions/checkout@v2'
+
     - id: 'auth'
       name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
+        workload_identity_provider: ${{ env.workload_identity_provider }}
+        service_account: ${{ env.service_account }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
-    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
-    - name: Setup Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
-          
-    # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-    - name: Terraform Init
-      run: |
+    - run: |-
         cd ./examples/poc/
         terraform init \
+          -var "access_token=${{ steps.auth.outputs.access_token }}" \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" \
+        terraform validate
+  
+  # Plan
+  plan:
+    needs: validate
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: 'actions/checkout@v2'
 
-    # Checks that all Terraform configuration files adhere to a canonical format
-    #- name: Terraform Format
-    #  run: terraform fmt -check
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        workload_identity_provider: ${{ env.workload_identity_provider }}
+        service_account: ${{ env.service_account }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
-    # Generates an execution plan for Terraform
-    - name: Terraform Plan
-      run: |
+    - run: |-
         cd ./examples/poc/
-        terraform plan -var-file="config/dev.tfvars"
+        terraform init \
+          -var "access_token=${{ steps.auth.outputs.access_token }}" \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY" \
+        terraform plan -var "access_token=${{ steps.auth.outputs.access_token }}" -out tfplan.plan
+    - name: 'Save Plan'
+      uses: actions/upload-artifact@v2
+      with:
+        name: tfplan.plan
+        path: tfplan.plan
 
-      # On push to main, build or change infrastructure according to Terraform configuration files
-      # Note: It is recommended to set up a required "strict" status check in your repository for "Terraform Cloud". See the documentation on "strict" required status checks for more information: https://help.github.com/en/github/administering-a-repository/types-of-required-status-checks
-    - name: Terraform Apply
-      if: github.ref == 'refs/heads/poc-prod' && github.event_name == 'push'
-      run: |
+  # Deploy
+  deploy:
+    needs: plan
+    # The type of runner that the job will run on
+    runs-on: self-hosted
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: 'actions/checkout@v2'
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        workload_identity_provider: ${{ env.workload_identity_provider }}
+        service_account: ${{ env.service_account }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: tfplan.plan
+
+    - run: |-
         cd ./examples/poc/
-        terraform apply -auto-approve -var-file="config/dev.tfvars"
-
- 
+        terraform init \
+          -var "access_token=${{ steps.auth.outputs.access_token }}" \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY" \
+        terraform apply -auto-approve tfplan.plan
