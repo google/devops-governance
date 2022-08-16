@@ -16,7 +16,7 @@
 
 module "secret-manager" {
   source          = "./modules/secret-manager"
-  label           = "DevOps Governance Secret"
+  label           = "devdps-governance-secret"
   project_id      = var.project
   secret_id       = "dg-secret"
   secret_version  = var.secret
