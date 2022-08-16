@@ -20,13 +20,16 @@ on:
       - poc-dev
 env:
   STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
-  workload_identity_provider: 'projects/110275740506/locations/global/workloadIdentityPools/github-pool/providers/github'
-  service_account: 'dev-service-account@devops-governance-dev.iam.gserviceaccount.com'
-  TF_VAR_project: 'devops-governance-dev'
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.DEV_SERVICE_ACCOUNT }}
+  TF_VAR_project: ${{ secrets.DEV_PROJECT }}
 
-# One can hide the WIP & SA with repository secrets:
-#  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-#  SERVICE_ACCOUNT: ${{ secrets.STAGE_SERVICE_ACCOUNT }}
+# OR SET MANUALLY
+#env:
+#  STATE_BUCKET: 'XXXX'
+#  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
+#  SERVICE_ACCOUNT: 'XXXX@XXXX'
+#  TF_VAR_project: 'XXXXXXX'
 
 jobs:
   # Validate
@@ -46,8 +49,8 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        workload_identity_provider: ${{ env.workload_identity_provider }}
-        service_account: ${{ env.service_account }}
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
@@ -82,8 +85,8 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        workload_identity_provider: ${{ env.workload_identity_provider }}
-        service_account: ${{ env.service_account }}
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
@@ -123,8 +126,8 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         token_format: 'access_token'
-        workload_identity_provider: ${{ env.workload_identity_provider }}
-        service_account: ${{ env.service_account }}
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
     # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
