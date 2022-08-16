@@ -1,2 +1,1 @@
-secret = "stage-x"
-stage  = "stage"
+secret = "green"

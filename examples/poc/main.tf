@@ -30,7 +30,7 @@ module "secret-manager-static" {
   label           = "devdps-governance-secret-static-over-stages"
   project_id      = var.project
   secret_id       = "dg-secret-static"
-  secret_version  = "my_fixed_secret"
+  secret_version  = "yellow"
   depends_on      = [module.secret-manager-variable]
 }
 
