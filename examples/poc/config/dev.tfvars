@@ -1,2 +1,1 @@
-secret = "dev-x"
-stage  = "dev"
+secret = "red"

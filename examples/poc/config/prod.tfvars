@@ -1,2 +1,1 @@
-secret = "prod-x"
-stage  = "prod"
+secret = "blue"
