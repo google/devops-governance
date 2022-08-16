@@ -17,7 +17,7 @@ name: DEV Environment POC
 on:
   push:
     branches:
-      - dev-poc
+      - poc-dev
 env:
   STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
   workload_identity_provider: 'projects/110275740506/locations/global/workloadIdentityPools/github-pool/providers/github'
