@@ -14,34 +14,11 @@
  * limitations under the License.
  */
 
-resource "google_project_service" "cloudresourcemanager" {
-  project = var.project
-  service = "cloudresourcemanager.googleapis.com"
+module "secret-manager" {
+  source          = "./modules/secret-manager"
+  label           = "DevOps Governance Secret"
+  project_id      = var.project
+  secret_id       = "dg-secret"
+  secret_version  = var.secret
 }
 
-resource "google_project_service" "secret-manager" {
-  project = var.project
-  service = "secretmanager.googleapis.com"
-  depends_on = [google_project_service.cloudresourcemanager]
-}
-
-resource "google_secret_manager_secret" "secret-basic" {
-  project = var.project
-  secret_id = "devops-governance-secret"
-
-  labels = {
-    label = "devops-governance-secret"
-  }
-
-  replication {
-    automatic = true
-  }
-  depends_on = [google_project_service.secret-manager]
-}
-
-
-resource "google_secret_manager_secret_version" "secret-version-basic" {
-  secret = google_secret_manager_secret.secret-basic.id
-  project = var.project
-  secret_data = var.secret
-}

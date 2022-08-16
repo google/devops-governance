@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-variable "iam" {
-  description = "IAM bindings in {SECRET => {ROLE => [MEMBERS]}} format."
-  type        = map(map(list(string)))
-  default     = {}
-}
-
-variable "labels" {
-  description = "Optional labels for each secret."
-  type        = map(map(string))
-  default     = {}
+variable "label" {
+  description = "A single label for the secret"
+  type        = string
 }
 
 variable "project_id" {
@@ -31,17 +24,13 @@ variable "project_id" {
   type        = string
 }
 
-variable "secrets" {
-  description = "Map of secrets to manage and their locations. If locations is null, automatic management will be set."
-  type        = map(list(string))
-  default     = {}
+variable "secret_id" {
+  description = "A single secret id to store"
+  type        = string
 }
 
-variable "versions" {
-  description = "Optional versions to manage for each secret. Version names are only used internally to track individual versions."
-  type = map(map(object({
-    enabled = bool
-    data    = string
-  })))
-  default = {}
+
+variable "secret_version" {
+  description = "A single secret version to store"
+  type        = string
 }

@@ -14,72 +14,33 @@
  * limitations under the License.
  */
 
-locals {
-  # distinct is needed to make the expanding function argument work
-  iam = flatten([
-    for secret, roles in var.iam : [
-      for role, members in roles : {
-        secret  = secret
-        role    = role
-        members = members
-      }
-    ]
-  ])
-  version_pairs = flatten([
-    for secret, versions in var.versions : [
-      for name, attrs in versions : merge(attrs, { name = name, secret = secret })
-    ]
-  ])
-  version_keypairs = {
-    for pair in local.version_pairs : "${pair.secret}:${pair.name}" => pair
-  }
+resource "google_project_service" "cloudresourcemanager" {
+  project = var.project_id
+  service = "cloudresourcemanager.googleapis.com"
 }
 
-resource "google_secret_manager_secret" "default" {
-  provider  = google-beta
-  for_each  = var.secrets
-  project   = var.project_id
-  secret_id = each.key
-  labels    = lookup(var.labels, each.key, null)
-
-  dynamic "replication" {
-    for_each = each.value == null ? [""] : []
-    content {
-      automatic = true
-    }
-  }
-
-  dynamic "replication" {
-    for_each = each.value == null ? [] : [each.value]
-    iterator = locations
-    content {
-      user_managed {
-        dynamic "replicas" {
-          for_each = locations.value
-          iterator = location
-          content {
-            location = location.value
-          }
-        }
-      }
-    }
-  }
+resource "google_project_service" "secret-manager" {
+  project = var.project_id
+  service = "secretmanager.googleapis.com"
+  depends_on = [google_project_service.cloudresourcemanager]
 }
 
-resource "google_secret_manager_secret_version" "default" {
-  provider    = google-beta
-  for_each    = local.version_keypairs
-  secret      = google_secret_manager_secret.default[each.value.secret].id
-  enabled     = each.value.enabled
-  secret_data = each.value.data
+resource "google_secret_manager_secret" "secret-basic" {
+  project = var.project_id
+  secret_id = var.secret_id
+
+  labels = {
+    label = var.label
+  }
+
+  replication {
+    automatic = true
+  }
+  depends_on = [google_project_service.secret-manager]
 }
 
-resource "google_secret_manager_secret_iam_binding" "default" {
-  provider = google-beta
-  for_each = {
-    for binding in local.iam : "${binding.secret}.${binding.role}" => binding
-  }
-  role      = each.value.role
-  secret_id = google_secret_manager_secret.default[each.value.secret].id
-  members   = each.value.members
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+  secret_data = var.secret_version
 }
