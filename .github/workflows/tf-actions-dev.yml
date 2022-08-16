@@ -144,4 +144,4 @@ jobs:
         terraform init \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" 
-        terraform apply -auto-approve tfplan.plan -var-file="config/dev.tfvars"
+        terraform apply -auto-approve tfplan.plan
