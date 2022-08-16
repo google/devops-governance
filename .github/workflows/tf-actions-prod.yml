@@ -23,6 +23,7 @@ env:
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
   SERVICE_ACCOUNT: ${{ secrets.PROD_SERVICE_ACCOUNT }}
   TF_VAR_project: ${{ secrets.PROD_PROJECT }}
+  TF_VAR_stage: 'prod'
 
 # OR SET MANUALLY
 #env:
@@ -64,7 +65,7 @@ jobs:
         cd ./examples/poc/
         terraform init \
           -backend-config="bucket=$STATE_BUCKET" \
-          -backend-config="prefix=$GITHUB_REPOSITORY" 
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
         terraform validate
   
   # Plan
@@ -100,7 +101,7 @@ jobs:
         cd ./examples/poc/
         terraform init \
           -backend-config="bucket=$STATE_BUCKET" \
-          -backend-config="prefix=$GITHUB_REPOSITORY" 
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
         terraform plan -out tfplan.plan -var-file="config/prod.tfvars"
     - name: 'Save Plan'
       uses: actions/upload-artifact@v2
@@ -146,5 +147,5 @@ jobs:
         cd ./examples/poc/
         terraform init \
           -backend-config="bucket=$STATE_BUCKET" \
-          -backend-config="prefix=$GITHUB_REPOSITORY" 
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
         terraform apply -auto-approve tfplan.plan
