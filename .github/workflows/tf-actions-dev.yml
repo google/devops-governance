@@ -24,6 +24,10 @@ env:
   service_account: 'dev-service-account@devops-governance-dev.iam.gserviceaccount.com'
   TF_VAR_project: 'devops-governance-dev'
 
+# One can hide the WIP & SA with repository secrets:
+#  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+#  SERVICE_ACCOUNT: ${{ secrets.STAGE_SERVICE_ACCOUNT }}
+
 jobs:
   # Validate
   validate:
