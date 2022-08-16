@@ -99,13 +99,13 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: tfplan.plan
-        path: tfplan.plan
+        path: ./examples/poc/tfplan.plan
 
   # Deploy
   deploy:
     needs: plan
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -133,6 +133,7 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: tfplan.plan
+        path: ./examples/poc/
 
     - run: |-
         cd ./examples/poc/
