@@ -24,7 +24,7 @@ variable "stage" {
   default = "dev"
 }
 
-variable "secret" {
+variable "variable-secret" {
   type    = string
   default = "secret"
 }

@@ -14,11 +14,23 @@
  * limitations under the License.
  */
 
+# This is an example of infrastructure does change over different stages/environments. 
+# The configuration is kept in the config folder and used to deploy to the relevant stage.
 module "secret-manager" {
   source          = "./modules/secret-manager"
-  label           = "devdps-governance-secret"
+  label           = "devdps-governance-secret-variable-over-stages"
   project_id      = var.project
-  secret_id       = "dg-secret"
-  secret_version  = var.secret
+  secret_id       = "dg-secret-variable"
+  secret_version  = var.variable-secret
 }
+
+# This is an example of infrastructure does not change over different stages/environments.
+module "secret-manager-fixed" {
+  source          = "./modules/secret-manager"
+  label           = "devdps-governance-secret-fixed-over-stages"
+  project_id      = var.project
+  secret_id       = "dg-secret-fixed"
+  secret_version  = "my_fixed_secret"
+}
+
 
