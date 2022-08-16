@@ -31,6 +31,7 @@ module "secret-manager-static" {
   project_id      = var.project
   secret_id       = "dg-secret-static"
   secret_version  = "my_fixed_secret"
+  depends_on      = [module.secret-manager-variable]
 }
 
 
