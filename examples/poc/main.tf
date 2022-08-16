@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
- resource "google_project_service" "secret-manager" {
+resource "google_project_service" "secret-manager" {
   project = var.project
   service = "secretmanager.googleapis.com"
 }
 
+resource "google_project_service" "cloudresourcemanager" {
+  project = var.project
+  service = "cloudresourcemanager.googleapis.com"
+}
 
 module "secret-manager" {
   source     = "./modules/secret-manager"
@@ -31,6 +35,6 @@ module "secret-manager" {
       v1 = { enabled = true, data = var.secret }
     }
   }
-  depends_on = [google_project_service.secret-manager]
+  depends_on = [google_project_service.secret-manager, google_project_service.cloudresourcemanager]
 }
 
