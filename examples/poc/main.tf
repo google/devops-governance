@@ -26,6 +26,7 @@ resource "google_project_service" "secret-manager" {
 }
 
 resource "google_secret_manager_secret" "secret-basic" {
+  project = var.project
   secret_id = "devops-governance-secret"
 
   labels = {
@@ -41,6 +42,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 
 resource "google_secret_manager_secret_version" "secret-version-basic" {
   secret = google_secret_manager_secret.secret-basic.id
-
+  project = var.project
   secret_data = var.secret
 }
