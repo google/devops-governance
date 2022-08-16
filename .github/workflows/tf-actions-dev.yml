@@ -28,7 +28,7 @@ jobs:
   # Validate
   validate:
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -46,10 +46,16 @@ jobs:
         service_account: ${{ env.service_account }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
     - run: |-
         cd ./examples/poc/
         terraform init \
-          -var "access_token=${{ steps.auth.outputs.access_token }}" \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" \
         terraform validate
@@ -58,7 +64,7 @@ jobs:
   plan:
     needs: validate
     # The type of runner that the job will run on
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
@@ -76,10 +82,16 @@ jobs:
         service_account: ${{ env.service_account }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
     - run: |-
         cd ./examples/poc/
         terraform init \
-          -var "access_token=${{ steps.auth.outputs.access_token }}" \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" \
         terraform plan -var "access_token=${{ steps.auth.outputs.access_token }}" -out tfplan.plan
@@ -111,6 +123,13 @@ jobs:
         service_account: ${{ env.service_account }}
         access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
 
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
     - uses: actions/download-artifact@v2
       with:
         name: tfplan.plan
@@ -118,7 +137,6 @@ jobs:
     - run: |-
         cd ./examples/poc/
         terraform init \
-          -var "access_token=${{ steps.auth.outputs.access_token }}" \
           -backend-config="bucket=$STATE_BUCKET" \
           -backend-config="prefix=$GITHUB_REPOSITORY" \
         terraform apply -auto-approve tfplan.plan
