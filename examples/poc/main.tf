@@ -25,17 +25,22 @@ resource "google_project_service" "secret-manager" {
   depends_on = [google_project_service.cloudresourcemanager]
 }
 
-module "secret-manager" {
-  source     = "./modules/secret-manager"
-  project_id = var.project
-  secrets    = {
-    devops-governance = null
+resource "google_secret_manager_secret" "secret-basic" {
+  secret_id = "devops-governance-secret"
+
+  labels = {
+    label = "devops-governance-secret"
   }
-  versions = {
-    devops-governance = {
-      v1 = { enabled = true, data = var.secret }
-    }
+
+  replication {
+    automatic = true
   }
   depends_on = [google_project_service.secret-manager]
 }
 
+
+resource "google_secret_manager_secret_version" "secret-version-basic" {
+  secret = google_secret_manager_secret.secret-basic.id
+
+  secret_data = var.secret
+}
