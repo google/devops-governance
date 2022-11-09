@@ -1,1 +1,1 @@
-secret = "red"
+secret = "magenta"
