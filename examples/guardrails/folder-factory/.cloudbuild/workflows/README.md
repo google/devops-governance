@@ -37,5 +37,7 @@ variables:
   # The GCS bucket to store the terraform state 
   _TO_SHA: $(body.after)
   # It contains the SHA of the commit that invoked the build. Substitute its value with $(body.after)
+  _SSH_REPOSITORY_NAME: 'XXXX'
+  # It contains the gitlab URL of the repository in SSH format. E.g. git@gitlab.com:pawanphalak/cloud-build-terraform-iac.git
 ```
 
