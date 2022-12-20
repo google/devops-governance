@@ -1,0 +1,93 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+# Setup SSH:
+# 1- save the SSH key from Secret Manager to a file
+# 2- add the host key to the known_hosts file
+  - name: gcr.io/cloud-builders/git
+    args:
+      - '-c'
+      - |
+        echo "$$SSHKEY" > /root/.ssh/id_rsa
+        chmod 400 /root/.ssh/id_rsa
+        ssh-keyscan gitlab.com > /root/.ssh/known_hosts
+    entrypoint: bash
+    secretEnv:
+      - SSHKEY
+    volumes:
+      - name: ssh
+        path: /root/.ssh
+
+  # Clone the repository
+  - name: gcr.io/cloud-builders/git
+    args:
+      - clone
+      - '-n'
+      - 'git@gitlab.com:pawanphalak/cloud-build-terraform-iac.git'
+      - .
+    volumes:
+      - name: ssh
+        path: /root/.ssh
+
+  # Checkout the specific commit that invoked this build
+  - name: gcr.io/cloud-builders/git
+    args:
+      - checkout
+      - $_TO_SHA
+  
+  # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+  - id: 'Terraform Init'
+    name: 'hashicorp/terraform'
+    dir: $_FOLDER
+    entrypoint: 'sh'
+    args: 
+    - '-c'
+    - |
+        terraform init \
+          -backend-config="bucket=$_STATE_BUCKET" \
+          -backend-config="prefix=$_REPOSITORY_NAME" \
+  
+  # Generates an execution plan for Terraform
+  - id: ' Terraform Plan'
+    name: 'hashicorp/terraform'
+    dir: $_FOLDER
+    entrypoint: 'sh'
+    args: 
+    - '-c'
+    - | 
+        terraform plan 
+  
+  # On push to main, build or change infrastructure according to Terraform configuration files
+  - id: 'Terraform Apply'
+    name: 'hashicorp/terraform'
+    dir: $_FOLDER
+    entrypoint: 'sh'
+    args: 
+    - '-c'
+    - | 
+        if [ "$_BRANCH" == "refs/heads/main" ];then
+          terraform apply -auto-approve
+        fi
+
+# This field is used for secret from Secret Manager with Cloud Build.
+availableSecrets:
+  secretManager:
+    - versionName: $_DEV_SECRET
+      env: SSHKEY
+
+# Use this option to specify the logs location. With CLOUD_LOGGING_ONLY, logs are stored in Cloud Logging. See the document for more logging options https://cloud.google.com/build/docs/api/reference/rest/v1/projects.builds#loggingmode.
+options:
+  logging: CLOUD_LOGGING_ONLY
+  
