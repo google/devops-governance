@@ -41,7 +41,8 @@ resource "google_iam_workload_identity_pool_provider" "wif-provider-gitlab" {
     "attribute.sub" = "assertion.sub"
   }
   oidc {
-    issuer_uri        = "https://gitlab.com"
+    issuer_uri        = "https://gitlab.com/"
+    allowed_audiences = ["https://gitlab.com"]
   }
 }
 
