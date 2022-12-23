@@ -1,0 +1,133 @@
+workflow:
+  rules:
+    - changes:
+      - "*.tf"
+      - "*.tfvars"
+      - "data/**/*"
+      - "modules/**/*"
+
+# Workflow image
+default:
+  image:
+    name: google/cloud-sdk:slim
+  # pull_policy: if-not-present  #Not allowed on the SaaS gitlab runners.
+
+# Workflow variables. They can be overwritten by passing pipeline Variables in Gitlab repository
+variables:
+  TF_VERSION: $TF_VERSION    
+  TF_ROOT: $TF_ROOT
+  TF_LOG: $TF_LOG
+  TF_TIMEOUT: $TF_TIMEOUT
+  TF_PLAN_NAME: plan.tfplan
+  TF_PLAN_JSON: plan.json
+  REFRESH: -refresh=true
+  STATE_BUCKET: $STATE_BUCKET
+  GCP_PROJECT_ID: $GCP_PROJECT_ID
+  GCP_WORKLOAD_IDENTITY_PROVIDER: $GCP_WORKLOAD_IDENTITY_PROVIDER
+  GCP_SERVICE_ACCOUNT: $GCP_SERVICE_ACCOUNT
+
+# Provides a list of stages for this GitLab workflow
+stages:
+  - setup-terraform
+  - validate
+  - plan
+  - apply
+
+.gcp-auth: &gcp-auth
+    - echo ${CI_JOB_JWT_V2} > .ci_job_jwt_file
+    - gcloud iam workload-identity-pools create-cred-config ${GCP_WORKLOAD_IDENTITY_PROVIDER} --service-account="${GCP_SERVICE_ACCOUNT}" --output-file=.gcp_temp_cred.json --credential-source-file=.ci_job_jwt_file
+    - gcloud auth login --cred-file=`pwd`/.gcp_temp_cred.json
+    - gcloud config set project $GCP_PROJECT_ID
+    - export GOOGLE_APPLICATION_CREDENTIALS=`pwd`/.gcp_temp_cred.json
+
+.terraform-ver-init: &terraform-ver-init
+  - cd $TF_ROOT
+  - cp ./terraform /usr/bin/
+  - terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=$CI_PROJECT_NAME" --upgrade=True
+
+# Cache files between jobs
+cache:
+  key: "$CI_COMMIT_SHA"
+  # Globally caches the .terraform folder across each job in this workflow
+  paths:
+    - $TF_ROOT/.terraform
+
+#Job: setup-terraform | Stage: setup-terraform
+# Purpose: downloads specified version of terraform binary and passes it as artifact for the other jobs and stages
+setup-terraform:
+  stage: setup-terraform
+  script:
+    - /bin/sh -c 'apt-get update && apt -y install unzip wget && wget https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip && unzip terraform_${TF_VERSION}_linux_amd64.zip'
+  artifacts:
+    untracked: false
+    paths:
+      - terraform
+
+#Job: tf-fmt | Stage: validate
+# Purpose: check the format (fmt) as a sort of linting test
+tf-fmt:
+  stage: validate
+  dependencies:
+    - setup-terraform
+  before_script:
+    - *gcp-auth
+    - *terraform-ver-init
+  script:
+    - terraform fmt -recursive -check
+  allow_failure: false
+    
+# Job: Validate | Stage: Validate
+# Purpose: Syntax Validation for the Terraform configuration files
+validate:
+  stage: validate
+  dependencies:
+    - setup-terraform
+  before_script:
+    - *gcp-auth
+    - *terraform-ver-init
+  script:
+    - terraform validate
+  allow_failure: false
+
+#Job: plan | Stage: Plan
+#Runs terraform plan and outputs the plan and a json summary to 
+#local files which are later made available as artifacts.
+plan: 
+  stage: plan
+  dependencies:
+    - setup-terraform
+    - validate
+  before_script:
+    - *gcp-auth
+    - *terraform-ver-init
+    - apt install -y jq 
+    - shopt -s expand_aliases && alias convert_report="jq -r '([.resource_changes[]?.change.actions?]|flatten)|{\"create\":(map(select(.==\"create\"))|length),\"update\":(map(select(.==\"update\"))|length),\"delete\":(map(select(.==\"delete\"))|length)}'"
+  script:
+    - cd $TF_ROOT
+    - terraform plan -out=$TF_PLAN_NAME $REFRESH
+    - terraform show --json $TF_PLAN_NAME | convert_report > $TF_PLAN_JSON
+  allow_failure: false
+
+  artifacts:
+    reports:
+      terraform: ${TF_ROOT}/$TF_PLAN_JSON
+    paths:
+      - ${TF_ROOT}/$TF_PLAN_NAME
+      - ${TF_ROOT}/$TF_PLAN_JSON
+    expire_in: 7 days   #optional. Gitlab stores artifacts of successful pipelines for the most recent commit on each ref. If needed, enable "Keep artifacts from most recent successful jobs"  in CI/CD settings of the repository.
+
+#Stage:apply | job: apply
+# purpose: executes the plan from the file created in the plan stage
+apply:
+  stage: apply
+  before_script:
+    - *gcp-auth
+    - *terraform-ver-init
+  dependencies:
+    - setup-terraform
+    - plan
+  script:
+    - cd $TF_ROOT
+    - terraform apply -auto-approve $TF_PLAN_NAME 
+  when: manual
+  allow_failure: false
