@@ -16,5 +16,4 @@
  
 variable "project" {
   type    = string
-  default = "project-id"
 }
