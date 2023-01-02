@@ -1,7 +1,7 @@
 
-# Build Repository from Gitlab
+# Terraform pipeline execution with Gitlab runners and Gitlab repository
 
-This workflow is to run terraform pipelines using Gitlab CICD. This document covers the steps to setup Gitlab CICD and provides a high level overview of the stages involved:
+This workflow runs terraform pipelines using Gitlab CICD. This document covers the steps to setup Gitlab CICD and provides a high level overview of the stages involved:
 
 ## Prerequisites
 
