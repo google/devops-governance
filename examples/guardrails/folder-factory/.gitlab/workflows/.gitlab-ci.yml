@@ -1,3 +1,5 @@
+#The pipeline only gets triggered only when a change is committed to one of the following directories mentioned below. 
+#To update this behavior, add or remove items under changes: section.
 workflow:
   rules:
     - changes:
@@ -17,7 +19,6 @@ variables:
   TF_VERSION: $TF_VERSION    
   TF_ROOT: $TF_ROOT
   TF_LOG: $TF_LOG
-  TF_TIMEOUT: $TF_TIMEOUT
   TF_PLAN_NAME: plan.tfplan
   TF_PLAN_JSON: plan.json
   REFRESH: -refresh=true
@@ -129,5 +130,5 @@ apply:
   script:
     - cd $TF_ROOT
     - terraform apply -auto-approve $TF_PLAN_NAME 
-  when: manual
+  when: manual   #Set as manual currently as WIF doesn't support merge request pipelines for now.
   allow_failure: false

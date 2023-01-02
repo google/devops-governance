@@ -7,7 +7,6 @@ variables:
   TF_VERSION: $TF_VERSION
   TF_LOG: $TF_LOG
   TF_ROOT: $TF_ROOT
-  TF_TIMEOUT: $TF_TIMEOUT
 
 trigger_dev:
   variables:

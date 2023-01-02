@@ -112,5 +112,5 @@ apply:
   script:
     - cd $TF_ROOT
     - terraform apply -auto-approve $TF_PLAN_NAME 
-  when: manual
+  when: manual    #Set as manual currently as WIF doesn't support merge request pipelines for now.
   allow_failure: false
