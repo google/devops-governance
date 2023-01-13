@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-variable "impersonate_service_account_email" {
-  description = "Service account to be impersonated by workload identity federation."
-  type        = string
-}
-
-variable "tmp_oidc_token_path" {
-  description = "Name of the temporary file where TFC OIDC token will be stored to authentificate terraform provider google."
-  type        = string
-  default     = ".oidc_token"
+resource "google_tags_tag_binding" "binding" {
+  for_each  = coalesce(var.tag_bindings, {})
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${local.project.number}"
+  tag_value = each.value
 }

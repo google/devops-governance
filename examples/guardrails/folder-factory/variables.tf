@@ -13,3 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ variable "impersonate_service_account_email" {
+  description = "Service account to be impersonated by workload identity."
+  type        = string
+}
+
+# variable "project_id" {
+#   description = "GCP project ID."
+#   type        = string
+# }

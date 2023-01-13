@@ -15,20 +15,27 @@ This repository does not need any additional runners (uses Github runners) and d
 
 If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
 
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
+## Setting Up Terraform Wokspace on Terraform Cloud
 
-<img width="787" alt="Secret configuration" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
 
-or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
+- Ensure to have a Workspace created on terraform Cloud which would have Gitlab Repository as the VCS Source.
+
+- Update the [data](data/folders/) with pre created organisation ID and Service account.
+
+- Update the variables for Terraform Workspace as below
+
 ```
 env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
+  impersonate_service_account_email: 'xxx@project.iam.gserviceaccount.com'
+  # The Service Account used to create Folder.
+  project_id: 'xxxx'
+  # Project ID which will host provider aand pool
+  TFC_WORKLOAD_IDENTITY_AUDIENCE: '//iam.googleapis.com/projects/id/locations/global/workloadIdentityPools/<poolname>/providers/<providername>'
+  # WorkLoad Identity Audience will be used by tfc-oidc module for token generation and impersonation 
 ```
+
+
+> **_NOTE:_** You need to have TFC Workspace ID & TFC Organisation ID created, before it can be passed in [terraform-cloud-wif](terraform-cloud-wif) module to generate the Provider, Pool, Service account & IAM Role. This IAM Role would be attached to the Service Account allowing authorization.
 
 ## Setting up folders
 
