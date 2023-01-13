@@ -13,14 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-variable "project" {
-  type    = string
-  default = "project-id"
+
+data "external" "oidc_token_file" {
+  program = ["bash", "${path.module}/write_token.sh", "${var.tmp_oidc_token_path}"]
 }
 
-
-variable "impersonate_service_account_email" {
-  description = "Service account to be impersonated by workload identity."
-  type        = string
+data "external" "workload_identity_pool" {
+  program = ["bash", "${path.module}/get_audience.sh"]
 }

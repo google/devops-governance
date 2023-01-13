@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-variable "project" {
-  type    = string
-  default = "project-id"
-}
 
-
-variable "impersonate_service_account_email" {
-  description = "Service account to be impersonated by workload identity."
-  type        = string
+output "credentials" {
+  description = "Credentials in format to pass the to gcp provider."
+  value = jsonencode({
+    "type" : "external_account",
+    "audience" : data.external.workload_identity_pool.result.audience,
+    "subject_token_type" : "urn:ietf:params:oauth:token-type:jwt",
+    "token_url" : "https://sts.googleapis.com/v1/token",
+    "credential_source" : data.external.oidc_token_file.result
+    "service_account_impersonation_url" : "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${var.impersonate_service_account_email}:generateAccessToken"
+  })
 }

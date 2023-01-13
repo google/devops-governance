@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-variable "project" {
-  type    = string
-  default = "project-id"
-}
-
 
 variable "impersonate_service_account_email" {
-  description = "Service account to be impersonated by workload identity."
+  description = "Service account to be impersonated by workload identity federation."
   type        = string
+}
+
+variable "tmp_oidc_token_path" {
+  description = "Name of the temporary file where TFC OIDC token will be stored to authentificate terraform provider google."
+  type        = string
+  default     = ".oidc_token"
 }

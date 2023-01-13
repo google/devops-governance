@@ -1,3 +1,4 @@
+
 # Skunkworks - IaC Kickstarter Template
 
 This is a template for an IaC kickstarter repository.
@@ -6,24 +7,31 @@ This is a template for an IaC kickstarter repository.
 
 The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. 
 
-This template creates a bucket in the specified target environment.
+This template will use the project and service account created in project factory to deploy reosurces for Skunkworks.
 
 ## Repository Configuration
 This repository does not need any additional runners (uses Github runners) and does require you to previously setup Workload Identity Federation to authenticate.
 
 If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
 
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
 
-<img width="787" alt="Secret configuration" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
+- Ensure to have a Workspace created on terraform Cloud which would have Gitlab Repository as the VCS Source
 
-or by modifing the [Workflow Action Files](.github/workflows/) and setting the environment variables:
+- Outputs of Project Factory, will give the variable values for below variables, and the same has to be updated on the terraform workspace
+
 ```
 env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
+  impersonate_service_account_email: 'xxx@project.iam.gserviceaccount.com'
+  # The Service Account used to create Folder
+
+  project: 'xxxx'
+  # Project in which resource will be created
+
+  TFC_WORKLOAD_IDENTITY_AUDIENCE: '//iam.googleapis.com/projects/id/locations/global/workloadIdentityPools/<poolname>/providers/<providername>'
+  # WorkLoad Identity Audience will be used by tfc-oidc module for token generation and impersonation 
 ```
+
+
+> **_NOTE:_** You can create multiple branches to control the Skunkworks deployment workflow. You can upadte the Terraform Workspace below Settings
+>  - Terraform Working Directory
+>  - VCS Branch 

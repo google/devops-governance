@@ -20,4 +20,3 @@ resource "google_storage_bucket" "bucket" {
   location      = "EU"
   force_destroy = true
 }
-

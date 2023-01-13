@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-terraform {
-  backend "gcs" {
-  }
+module "tfe_oidc" {
+  source = "./tfc-oidc"
+
+  impersonate_service_account_email = var.impersonate_service_account_email
 }
 
 provider "google" {
-
+  credentials = module.tfe_oidc.credentials
 }
 
-provider "google-beta" {
 
+provider "google-beta" {
+  credentials = module.tfe_oidc.credentials
 }
