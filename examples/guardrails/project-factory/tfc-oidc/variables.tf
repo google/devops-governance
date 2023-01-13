@@ -14,31 +14,13 @@
  * limitations under the License.
  */
 
-# terraform {
-#   backend "gcs" {
-#   }
-# }
-
-# provider "google" {
-
-# }
-
-# provider "google-beta" {
-
-# }
-
-
-module "tfe_oidc" {
-  source = "./tfc-oidc"
-
-  impersonate_service_account_email = var.impersonate_service_account_email
+variable "impersonate_service_account_email" {
+  description = "Service account to be impersonated by workload identity federation."
+  type        = string
 }
 
-provider "google" {
-  credentials = module.tfe_oidc.credentials
-}
-
-
-provider "google-beta" {
-  credentials = module.tfe_oidc.credentials
+variable "tmp_oidc_token_path" {
+  description = "Name of the temporary file where TFC OIDC token will be stored to authentificate terraform provider google."
+  type        = string
+  default     = ".oidc_token"
 }

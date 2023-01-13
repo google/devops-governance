@@ -24,17 +24,22 @@ output "wif_provider_id_gitlab" {
   value       = google_iam_workload_identity_pool_provider.wif-provider-gitlab.name
 }
 
-output "wif_pool_id_github" {
-  description = "Github Workload Identity Pool"
-  value       = google_iam_workload_identity_pool.wif-pool-github.name
-}
+# output "wif_pool_id_github" {
+#   description = "Github Workload Identity Pool"
+#   value       = google_iam_workload_identity_pool.wif-pool-github.name
+# }
 
-output "wif_provider_id_github" {
-  description = "Github Workload Identity Pool"
-  value       = google_iam_workload_identity_pool_provider.wif-provider-github.name
-}
+# output "wif_provider_id_github" {
+#   description = "Github Workload Identity Pool"
+#   value       = google_iam_workload_identity_pool_provider.wif-provider-github.name
+# }
 
 output "projects" {
   description = "Created projects and service accounts."
   value       = module.project
+}
+
+output "workload_identity_audience" {
+  description = "TFC Workload Identity Audience."
+  value       = "//iam.googleapis.com/${google_iam_workload_identity_pool_provider.wif-provider-gitlab.name}"
 }

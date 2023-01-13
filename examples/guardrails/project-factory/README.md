@@ -17,22 +17,26 @@ This repository does not need any additional runners (uses Github runners) and d
 
 If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
 
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
+## Setting Up Terraform Wokspace on Terraform Cloud
 
-<img width="785" alt="Secret settings" src="https://user-images.githubusercontent.com/94000358/161528557-41446670-1e3b-4ea1-996d-e377e53d9c43.png">
+Ensure to have a Workspace created on terraform Cloud which would have Gitlab Repository as the VCS Source
 
-or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
+Update the variables for Terraform Workspace as below
+
 ```
 env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  FOLDER: 'folders/XXXX'
-  # The folder under which the projects should be created
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
+  impersonate_service_account_email: 'xxx@project.iam.gserviceaccount.com'
+  # The Service Account used to create Folder
+
+  folder: 'xxxx'
+  # Folder under which Projects will be created
+
+  TFC_WORKLOAD_IDENTITY_AUDIENCE: '//iam.googleapis.com/projects/id/locations/global/workloadIdentityPools/<poolname>/providers/<providername>'
+  # WorkLoad Identity Audience will be used by tfc-oidc module for token generation and impersonation 
 ```
+
+
+> **_NOTE:_** You need to have TFC Workspace ID created manually, before it can be passed in terraform-cloud-wif module under Folder Factory to generate the Provider, Pool Service account and IAM Role attached to the role.
 
 ## Setting up projects
 
@@ -67,9 +71,10 @@ roles:
     - roles/storage.objectAdmin
     - roles/storage.objectCreator
     - roles/storage.objectViewer
-repo_provider: github
-repo_name: devops-governance/skunkworks
-repo_branch: dev
+repo_provider: gitlab                                 
+tfe_workspace_id: ws-xxxx
 ```
 
-Every project is defined with its own file located in the [Project Folder](data/projects).
+Every project is defined with its own file located in the [Project Folder](data/projects). 
+
+> **_NOTE:_** You can also manage the environments seprately via a diffrent Gitlab Branches for each Environment Which and having environment specific file under [Project Folder](data/projects). These branches can be tied to individual workspace.

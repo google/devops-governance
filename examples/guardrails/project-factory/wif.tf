@@ -20,10 +20,16 @@ resource "random_id" "rand" {
 
 module "wif-project" {
   source          = "./modules/project"
-  name            = "wif-prj-${random_id.rand.hex}"
+  name            = "wif1-prj-${random_id.rand.hex}"
   parent          = var.folder
-  billing_account = "01B3B2-962224-4EEC67"
-}
+  billing_account = "019609-F059A9-76DC20"
+  services = [
+     "iam.googleapis.com",
+     "cloudresourcemanager.googleapis.com",
+     "iamcredentials.googleapis.com",
+     "sts.googleapis.com",
+   ]
+ }
 
 resource "google_iam_workload_identity_pool" "wif-pool-gitlab" {
   provider                  = google-beta
@@ -36,32 +42,42 @@ resource "google_iam_workload_identity_pool_provider" "wif-provider-gitlab" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.wif-pool-gitlab.workload_identity_pool_id
   workload_identity_pool_provider_id = "gitlab-provider-${random_id.rand.hex}"
   project                            = module.wif-project.project_id
-  attribute_mapping                  = {
-    "google.subject" = "assertion.sub"
-    "attribute.sub" = "assertion.sub"
+  #attribute_condition = "attribute.terraform_organization_id == \"${each.value.tfe_workspace_id}\""
+  attribute_mapping = {
+    "google.subject"                        = "assertion.sub"
+    "attribute.sub"                         = "assertion.sub"
+    "attribute.aud"                         = "assertion.aud"
+    "attribute.terraform_run_phase"         = "assertion.terraform_run_phase"
+    "attribute.terraform_workspace_id"      = "assertion.terraform_workspace_id"
+    "attribute.terraform_workspace_name"    = "assertion.terraform_workspace_name"
+    "attribute.terraform_organization_id"   = "assertion.terraform_organization_id"
+    "attribute.terraform_organization_name" = "assertion.terraform_organization_name"
+    "attribute.terraform_run_id"            = "assertion.terraform_run_id"
+    "attribute.terraform_full_workspace"    = "assertion.terraform_full_workspace"
   }
   oidc {
-    issuer_uri        = "https://gitlab.com"
+    #allowed_audiences = ["https://gitlab.com"]
+    issuer_uri        = "https://app.terraform.io/"
   }
 }
 
-resource "google_iam_workload_identity_pool" "wif-pool-github" {
-  provider                  = google-beta
-  workload_identity_pool_id = "github-pool-${random_id.rand.hex}"
-  project                   = module.wif-project.project_id
-}
+# resource "google_iam_workload_identity_pool" "wif-pool-github" {
+#   provider                  = google-beta
+#   workload_identity_pool_id = "github-pool-${random_id.rand.hex}"
+#   project                   = module.wif-project.project_id
+# }
 
-resource "google_iam_workload_identity_pool_provider" "wif-provider-github" {
-  provider                           = google-beta
-  workload_identity_pool_id          = google_iam_workload_identity_pool.wif-pool-github.workload_identity_pool_id
-  workload_identity_pool_provider_id = "github-provider-${random_id.rand.hex}"
-  project                            = module.wif-project.project_id
-  attribute_mapping                  = {
-    "google.subject" = "assertion.sub"
-    "attribute.sub" = "assertion.sub"
-    "attribute.actor" = "assertion.actor"
-  }
-  oidc {
-    issuer_uri        = "https://token.actions.githubusercontent.com"
-  }
-}
+# resource "google_iam_workload_identity_pool_provider" "wif-provider-github" {
+#   provider                           = google-beta
+#   workload_identity_pool_id          = google_iam_workload_identity_pool.wif-pool-github.workload_identity_pool_id
+#   workload_identity_pool_provider_id = "github-provider-${random_id.rand.hex}"
+#   project                            = module.wif-project.project_id
+#   attribute_mapping = {
+#     "google.subject"  = "assertion.sub"
+#     "attribute.sub"   = "assertion.sub"
+#     "attribute.actor" = "assertion.actor"
+#   }
+#   oidc {
+#     issuer_uri = "https://token.actions.githubusercontent.com"
+#   }
+# }

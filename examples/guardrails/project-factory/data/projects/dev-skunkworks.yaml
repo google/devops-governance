@@ -10,9 +10,10 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-# limitations under the License.
+# limitations under the License..
 
-billing_account_id: XXXXXX-XXXXXX-XXXXXX
+billing_account_id: 019609-F059A9-76DC20
+# folder: folders/872171141499
 roles:
     - roles/viewer
     - roles/iam.serviceAccountUser
@@ -36,6 +37,6 @@ roles:
     - roles/storage.objectAdmin
     - roles/storage.objectCreator
     - roles/storage.objectViewer
-repo_provider: github
-repo_name: github-org/github-repo
-repo_branch: dev
+repo_provider: gitlab                                 
+#tfe_organization_id: org-78zP2BW2RbKAGWVZ
+tfe_workspace_id:  ws-JttC5tTBrmbTrMrR

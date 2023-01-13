@@ -24,13 +24,13 @@ output "service_account_email" {
   value       = google_service_account.sa.email
 }
 
-output "repo_sub" {
-  description = "Repository"
-  value       = var.repo_sub
-}
+# output "repo_sub" {
+#   description = "Repository"
+#   value       = var.repo_sub
+# }
 
-output "repo_provider" {
-  description = "Repository Provider"
-  value       = var.repo_provider
-}
+# output "repo_provider" {
+#   description = "Repository Provider"
+#   value       = var.repo_provider
+# }
 

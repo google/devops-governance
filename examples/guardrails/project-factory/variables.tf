@@ -15,5 +15,12 @@
  */
 
 variable "folder" {
-  
+  default = "folders/714215143280"
+}
+
+
+variable "impersonate_service_account_email" {
+  description = "Service account to be impersonated by workload identity."
+  type        = string
+  #default     = "test-sa@iac-prd-v2.iam.gserviceaccount.com"
 }

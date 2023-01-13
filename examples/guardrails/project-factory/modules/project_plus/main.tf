@@ -34,13 +34,14 @@ resource "google_service_account" "sa" {
 resource "google_service_account_iam_member" "sa-iam" {
   service_account_id = google_service_account.sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${var.wif-pool}/attribute.sub/${var.repo_sub}"
+  #member             = "principalSet://iam.googleapis.com/${var.wif-pool}/attribute.sub/${var.repo_sub}"
+  member             = "principalSet://iam.googleapis.com/${var.wif-pool}/attribute.terraform_workspace_id/${var.tfe_workspace_id}"
 }
 
 resource "google_project_iam_member" "sa-project" {
-  for_each = toset(var.roles)
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.sa.email}"
-  project = module.project.project_id
+  for_each   = toset(var.roles)
+  role       = each.value
+  member     = "serviceAccount:${google_service_account.sa.email}"
+  project    = module.project.project_id
   depends_on = [google_service_account.sa]
 }

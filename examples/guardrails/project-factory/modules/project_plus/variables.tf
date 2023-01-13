@@ -20,15 +20,15 @@ variable "team" {
   type        = string
 }
 
-variable "repo_sub" {
-  description = "Repository path"
-  type        = string
-}
+# variable "repo_sub" {
+#   description = "Repository path"
+#   type        = string
+# }
 
-variable "repo_provider" {
-  description = "Repository provider"
-  type        = string
-}
+# variable "repo_provider" {
+#   description = "Repository provider"
+#   type        = string
+# }
 
 variable "billing_account" {
   description = "Billing account name."
@@ -48,5 +48,10 @@ variable "roles" {
 
 variable "wif-pool" {
   description = "WIF pool name."
+  type        = string
+}
+
+variable "tfe_workspace_id" {
+  description = "TFE workspace id."
   type        = string
 }

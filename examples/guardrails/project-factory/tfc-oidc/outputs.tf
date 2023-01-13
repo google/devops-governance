@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-# terraform {
-#   backend "gcs" {
-#   }
-# }
-
-# provider "google" {
-
-# }
-
-# provider "google-beta" {
-
-# }
-
-
-module "tfe_oidc" {
-  source = "./tfc-oidc"
-
-  impersonate_service_account_email = var.impersonate_service_account_email
-}
-
-provider "google" {
-  credentials = module.tfe_oidc.credentials
-}
-
-
-provider "google-beta" {
-  credentials = module.tfe_oidc.credentials
+output "credentials" {
+  description = "Credentials in format to pass the to gcp provider."
+  value = jsonencode({
+    "type" : "external_account",
+    "audience" : data.external.workload_identity_pool.result.audience,
+    "subject_token_type" : "urn:ietf:params:oauth:token-type:jwt",
+    "token_url" : "https://sts.googleapis.com/v1/token",
+    "credential_source" : data.external.oidc_token_file.result
+    "service_account_impersonation_url" : "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${var.impersonate_service_account_email}:generateAccessToken"
+  })
 }

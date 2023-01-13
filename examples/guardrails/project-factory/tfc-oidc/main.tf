@@ -14,31 +14,10 @@
  * limitations under the License.
  */
 
-# terraform {
-#   backend "gcs" {
-#   }
-# }
-
-# provider "google" {
-
-# }
-
-# provider "google-beta" {
-
-# }
-
-
-module "tfe_oidc" {
-  source = "./tfc-oidc"
-
-  impersonate_service_account_email = var.impersonate_service_account_email
+data "external" "oidc_token_file" {
+  program = ["bash", "${path.module}/write_token.sh", "${var.tmp_oidc_token_path}"]
 }
 
-provider "google" {
-  credentials = module.tfe_oidc.credentials
-}
-
-
-provider "google-beta" {
-  credentials = module.tfe_oidc.credentials
+data "external" "workload_identity_pool" {
+  program = ["bash", "${path.module}/get_audience.sh"]
 }

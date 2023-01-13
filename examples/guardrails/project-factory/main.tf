@@ -13,7 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+#QUERY: Consider creating a state bucket in the project as well along with the project creation? Use the same bucket as folder factory.
+
+# Enable iamcredentials.googlepais.com service on the newly created project ? it is a prerequisitie for the WIF to work.
+
 locals {
   projects = {
     for f in fileset("./data/projects", "**/*.yaml") :
@@ -25,11 +29,11 @@ module "project" {
   source          = "./modules/project_plus"
   for_each        = local.projects
   team            = each.key
-  repo_sub        = "${each.value.repo_provider == "gitlab" ? "project_path:${each.value.repo_name}:ref_type:branch:ref:${each.value.repo_branch}" : "repo:${each.value.repo_name}:ref:refs/heads/${each.value.repo_branch}"}" 
-  repo_provider   = each.value.repo_provider
   billing_account = each.value.billing_account_id
   folder          = var.folder
   roles           = try(each.value.roles, [])
-  wif-pool        = "${each.value.repo_provider == "gitlab" ? google_iam_workload_identity_pool.wif-pool-gitlab.name : google_iam_workload_identity_pool.wif-pool-github.name}"
-  depends_on      = [google_iam_workload_identity_pool.wif-pool-github,google_iam_workload_identity_pool.wif-pool-gitlab]
+  tfe_workspace_id = each.value.tfe_workspace_id
+  #wif-pool        = each.value.repo_provider == "gitlab" ? google_iam_workload_identity_pool.wif-pool-gitlab.name : google_iam_workload_identity_pool.wif-pool-github.name
+  wif-pool        = google_iam_workload_identity_pool.wif-pool-gitlab.name
+  depends_on      = [google_iam_workload_identity_pool.wif-pool-gitlab]
 }
