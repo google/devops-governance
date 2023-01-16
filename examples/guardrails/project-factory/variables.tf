@@ -17,3 +17,11 @@
 variable "folder" {
   
 }
+variable "billing_account" {
+}
+variable "issuer_uri" {
+}
+
+variable "allowed_audiences" {
+  type = list
+}
