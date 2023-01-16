@@ -34,7 +34,7 @@ resource "google_service_account" "sa" {
 resource "google_service_account_iam_member" "sa-iam" {
   service_account_id = google_service_account.sa.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${var.wif-pool}/attribute.sub/${var.repo_sub}"
+  member             = "principalSet://iam.googleapis.com/${var.wif-pool}/attribute.branch_name/${var.repo_sub}"
 }
 
 resource "google_project_iam_member" "sa-project" {
