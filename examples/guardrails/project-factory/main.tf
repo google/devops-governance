@@ -25,11 +25,12 @@ module "project" {
   source          = "./modules/project_plus"
   for_each        = local.projects
   team            = each.key
-  repo_sub        = "${each.value.repo_provider == "gitlab" ? "project_path:${each.value.repo_name}:ref_type:branch:ref:${each.value.repo_branch}" : "repo:${each.value.repo_name}:ref:refs/heads/${each.value.repo_branch}"}" 
+  repo_sub        = each.value.repo_branch
   repo_provider   = each.value.repo_provider
   billing_account = each.value.billing_account_id
   folder          = var.folder
   roles           = try(each.value.roles, [])
-  wif-pool        = "${each.value.repo_provider == "gitlab" ? google_iam_workload_identity_pool.wif-pool-gitlab.name : google_iam_workload_identity_pool.wif-pool-github.name}"
-  depends_on      = [google_iam_workload_identity_pool.wif-pool-github,google_iam_workload_identity_pool.wif-pool-gitlab]
+  wif-pool        = google_iam_workload_identity_pool.wif-pool-jenkins.name
+  depends_on      = [google_iam_workload_identity_pool.wif-pool-jenkins]
 }
+
