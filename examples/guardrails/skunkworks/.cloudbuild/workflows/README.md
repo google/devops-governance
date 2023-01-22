@@ -28,7 +28,11 @@ variables:
   _BRANCH: $(body.ref)
   #  This variable provides information about the branch which invoked the trigger. Substitute its value with $(body.ref)
   _DEV_SECRET: 'projects/<GCP_PROJECT_ID>/secrets/<SECRET_NAME>/versions/<SECRET_VERSION>'
-  # It contains the URI of a secret manager resource with an ssh key which has access to the target gitlab repository. E.g. projects/123456789/secrets/gitlab-ssh/versions/1
+  # It contains the URI of a secret manager resource with an ssh key which has access to the target gitlab repository. E.g. projects/123456789/secrets/gitlab-ssh/versions/1. This variable is only required to be configured for configuring Skunkworks Development environment using tf-cloudbuild-dev.yaml file.
+  _STAGE_SECRET: 'projects/<GCP_PROJECT_ID>/secrets/<SECRET_NAME>/versions/<SECRET_VERSION>'
+  # It contains the URI of a secret manager resource with an ssh key which has access to the target gitlab repository. E.g. projects/123456789/secrets/gitlab-ssh/versions/1. This variable is only required to be configured for configuring Skunkworks Staging environment using tf-cloudbuild-stage.yaml file.
+  _PROD_SECRET: 'projects/<GCP_PROJECT_ID>/secrets/<SECRET_NAME>/versions/<SECRET_VERSION>'
+  # It contains the URI of a secret manager resource with an ssh key which has access to the target gitlab repository. E.g. projects/123456789/secrets/gitlab-ssh/versions/1. This variable is only required to be configured for configuring Skunkworks Production environment using tf-cloudbuild-prod.yaml file.
   _FOLDER: 'XXXX'
   # It contains the directory with terraform configuration files which needs to be build when the trigger is invoked. E.g. examples/guardrails/skunkworks
   _REPOSITORY_NAME: $(body.repository.name)

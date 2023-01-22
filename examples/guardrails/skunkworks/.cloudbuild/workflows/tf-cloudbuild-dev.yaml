@@ -77,7 +77,7 @@ steps:
     args: 
     - '-c'
     - | 
-        if [ "$_BRANCH" == "refs/heads/main" ];then
+        if [ "$_BRANCH" == "refs/heads/dev" ];then
           terraform apply -auto-approve
         fi
 
