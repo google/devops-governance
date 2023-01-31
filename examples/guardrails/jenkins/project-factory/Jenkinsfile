@@ -1,0 +1,39 @@
+pipeline {
+  
+    agent any
+     environment {
+      BUCKET_PATH = credentials('backend-path')
+     
+
+  }
+
+    options {
+    skipDefaultCheckout(true)
+  }
+    stages {
+      stage('clean workspace') {
+      steps {
+        cleanWs()
+      }
+    }
+      stage('checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+        stage('Terraform') {
+            steps {
+              
+                sh '''
+                 cd guardrails/project-factory
+                terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=project-factory-staging-tfstate" -var-file="staging.tfvars"
+                terraform plan -var-file="staging.tfvars" 
+                terraform apply -var-file="staging.tfvars"  -auto-approve
+                  
+              '''
+              
+            }
+        }
+    }
+}

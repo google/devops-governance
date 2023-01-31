@@ -1,0 +1,65 @@
+pipeline {
+  
+    agent any
+     environment {
+    BUCKET_PATH = credentials('backend-path')
+    SKUNKWORK_PROJECT = credentials('staging-project')
+    SW_PROJECT_NUMBER = credentials('sw-project-number')
+    SW_SERVICE_ACCOUNT = credentials('sw-sa')
+  }
+    options {
+    skipDefaultCheckout(true)
+  }
+    stages {
+      stage('clean workspace') {
+      steps {
+        cleanWs()
+      }
+    }
+           stage('WIF') {
+      steps {
+          withCredentials([file(variable: 'ID_TOKEN_STAGE', credentialsId: 'staging')]) {
+          writeFile file: "$WORKSPACE_TMP/sts_creds.json", text: """
+    {
+      "type": "external_account",
+      "audience": "//iam.googleapis.com/projects/${SW_PROJECT_NUMBER}/locations/global/workloadIdentityPools/jenkins-pool1-ad8aa16a/providers/jenkins-provider-ad8aa16a",
+      "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+      "token_url": "https://sts.googleapis.com/v1/token",
+      "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${SW_SERVICE_ACCOUNT}@${SKUNKWORK_PROJECT}.iam.gserviceaccount.com:generateAccessToken",
+      "credential_source": {
+        "file": "$ID_TOKEN_STAGE",
+        "format": {
+          "type": "text"
+        }
+      }
+    }
+  """
+  sh '''
+    gcloud auth login --brief --cred-file=$WORKSPACE_TMP/sts_creds.json
+  '''
+}
+      }
+           }
+
+       stage('checkout') {
+      steps {
+        checkout scm
+      }
+    }
+        stage('Terraform') {
+            steps {
+             
+               sh '''
+                 cd guardrails/skunkworks
+                terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=prod-skunkworks" 
+                terraform plan -var="project=${SKUNKWORK_PROJECT}"
+                terraform apply -var="project=${SKUNKWORK_PROJECT}" -auto-approve
+                  
+              '''
+              
+            }
+        }
+        
+       
+    }   
+}
