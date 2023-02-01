@@ -56,4 +56,4 @@ iam:
     - serviceAccount:XXXXX@XXXXXX
 ```
 
-Every folder is defined with its own yaml file located in the following [Folder](data/folder).
+Every folder is defined with its own yaml file located in the following [Folder](data/folders).
