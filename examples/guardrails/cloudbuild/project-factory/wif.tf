@@ -22,7 +22,7 @@ module "wif-project" {
   source          = "./modules/project"
   name            = "wif-prj-${random_id.rand.hex}"
   parent          = var.folder
-  billing_account = "01B3B2-962224-4EEC67"
+  billing_account = var.billing_account
 }
 
 resource "google_iam_workload_identity_pool" "wif-pool-gitlab" {
