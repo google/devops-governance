@@ -15,5 +15,11 @@
  */
 
 variable "folder" {
-  
+  type        = string
+  description = "Folder where projects will be created"
+}
+   
+variable "billing_account" {
+  type        = string
+  description = "GCP Billing Account"
 }
