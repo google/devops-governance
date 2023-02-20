@@ -5,10 +5,9 @@ This workflow runs terraform pipelines using Gitlab CICD. This document covers t
 
 ## Prerequisites
 
-* A Gitlab project containing the project-factory repository
+* A Gitlab project containing the skunkworks repository
 * Available Gitlab Runners for the project either self hosted or the SaaS Gitlab shared runners.
-* A working WIF provider, pool setup with audience as gitlab.com with neccessary attributes and linked service account with required permissions. For further details, please refer to the official [Gitlab Documentation](https://docs.gitlab.com/ee/ci/cloud_services/google_cloud/)
-
+* Project-factory is executed successfully
 
 
 ## Overview
@@ -40,7 +39,7 @@ This workflow can execute terraform on different GCP projects depending on the b
 | TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6                                                                                                           |                                                                                                          |
 
 ## Overview of the Pipeline stages
-The complete workflow consists of 4 stages and 2 before-script jobs
+The complete workflow contains a parent child pipeline with the parent containing just the trigger stage for each of the environments that passes relevant variables for that environment to the child pipeline which executes the core terraform workflow. The child pipeline [workflow](./workflow.yml) has 4 stages and 2 before-script jobs
 
 * before_script jobs : 
     * gcp-auth : creates the wif credentials by impersonating the service account. 
