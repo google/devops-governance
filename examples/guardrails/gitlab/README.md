@@ -62,3 +62,15 @@ The complete workflow consists of 4 stages and 2 before-script jobs
     * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt        command
     * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
     * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once plan is successful. Runs terraform apply and creates the infrastructure specified.
+
+## Troubleshooting
+* Gitlab documentation for provider creation gives “attribute.X” and “assertion.X” incase using those make sure they are in lowercase.
+* Issuer URL need to have “/” at the end https://gitlab.com/
+* “Cannot create a pool with the same name” - Requested entity already exists. How long can we not create it?
+* "Permission \'iam.serviceAccounts.getAccessToken\' denied on resource (or it may not exist).
+
+
+
+
+is there any correlation between what we specify as and the principal set we provide permissions for
+
