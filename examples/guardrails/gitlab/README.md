@@ -23,7 +23,7 @@ Please look through the [README](https://github.com/google/devops-governance/blo
 
 
 
-# Terraform pipeline execution with Gitlab runners and Gitlab repository
+# Terraform pipeline setup 
 
 1. Update the CICD configuration file path in the repository
     * From the folder-factory Gitlab project page, Navigate to Settings > CICD > expand General pipelines 
@@ -43,6 +43,12 @@ Please look through the [README](https://github.com/google/devops-governance/blo
 | TF_LOG                         | The terraform env variable setting to get detailed logs.  Supports TRACE,DEBUG,INFO,WARN,ERROR in order of decreasing verbosity                          | WARN                                                                                                            |
 | TF_ROOT                        | The directory of the terraform code to be executed.  Can be a path string or also a pre-defined gitlab CI variables                                      | $CI_PROJECT_DIR                                                                                                 |
 | TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6                                                                                                           |
+
+## Terraform pipeline setup 
+* folder-factoy looks for folder specifications in yaml format in data/folders
+* There is a sample file provided. Remove "folder.yaml.sample" to "<your folder name>.yaml"
+* merge the code into main and pipeline should start.
+* Look in troubleshooting section if there are any issues.
 
 ## Overview of the Pipeline stages
 The complete workflow consists of 4 stages and 2 before-script jobs
