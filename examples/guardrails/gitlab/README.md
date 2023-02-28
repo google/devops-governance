@@ -45,8 +45,18 @@ Please look through the [README](https://github.com/google/devops-governance/blo
 | TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6                                                                                                           |
 
 ## Terraform pipeline setup 
+
+## Folder Factory
 * folder-factoy looks for folder specifications in yaml format in data/folders
 * There is a sample file provided. Remove "folder.yaml.sample" to "<your folder name>.yaml"
+* merge the code into main and pipeline should start.
+* Look in troubleshooting section if there are any issues.
+
+
+## Project Factory
+* project-factoy looks for project specifications in yaml format in data/projects
+* There is a sample file provided. Remove "project.yaml.sample" to "<your project name>.yaml"
+* update billing_account_id
 * merge the code into main and pipeline should start.
 * Look in troubleshooting section if there are any issues.
 
@@ -62,6 +72,7 @@ The complete workflow consists of 4 stages and 2 before-script jobs
     * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt        command
     * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
     * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once plan is successful. Runs terraform apply and creates the infrastructure specified.
+
 
 ## Troubleshooting
 * Gitlab documentation for provider creation gives “attribute.X” and “assertion.X” incase using those make sure they are in lowercase.
