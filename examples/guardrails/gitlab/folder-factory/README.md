@@ -63,16 +63,27 @@ From the folder-factory Gitlab project page
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | GCP_PROJECT_ID                 | The GCP project ID of your service account                                                                                                               | sample-project-1122                                                                                             |
 | GCP_SERVICE_ACCOUNT            | The Service Account to be used for creating folders                                                                                                      | xyz@sample-project-1122.iam.gserviceaccount.com                                                                 |
-| GCP_WORKLOAD_IDENTITY_PROVIDER | The Workload Identity provider URI configured with the Service Account and the repository                                                                | projects/<project-number>/locations/global/workloadIdentityPools/<identity-pool-name>/providers/<provider-name> |
-| STATE_BUCKET                   | The GCS bucket in which the state is to be centrally managed. The Service account provided above must have access to list and write files to this bucket | sample-terraform-state-bucket                                                                                   |
+| GCP_WORKLOAD_IDENTITY_PROVIDER | The Workload Identity provider URI configured with the Service Account and the repository                                                                | projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/providers/${PROVIDER_NAME} |
+| STATE_BUCKET                   | The GCS bucket in which the state is to be centrally managed. The Service account provided above must have access to list and write files to this bucket. Use a seed project if running this as part of Foundations or create a new GCS Bucket. | sample-terraform-state-bucket                                                                                   |
 | TF_LOG                         | The terraform env variable setting to get detailed logs.  Supports TRACE,DEBUG,INFO,WARN,ERROR in order of decreasing verbosity                          | WARN                                                                                                            |
 | TF_ROOT                        | The directory of the terraform code to be executed.  Can be a path string or also a pre-defined gitlab CI variables                                      | $CI_PROJECT_DIR                                                                                                 |
 | TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6                                                                                                           |
 
+* Once the prerequisites are set up, any commit to the remote main branch with changes to  *.tf, *.tfvars, data/*, modules/* files should trigger the pipeline.  
 
 
+* .gcp-auth before-script should run successfully in the pipeline if the workload identity federation is configured as required.
 
-Once the prerequisites are set up, any commit to the remote main branch with changes to  *.tf, *.tfvars, data/*, modules/* files should trigger the pipeline.  
+### Pipeline Workflow Overview
+The complete workflow comprises of 4 stages and 2 before-script jobs
+  * before_script jobs :
+    * gcp-auth : creates the wif credentials by impersonating the service account.
+    * terraform init : initializes terraform in the specified TF_ROOT directory
+  * Stages:
+    * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
+    * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt command
+    * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
+    * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once the plan is successful. 
+             Runs terraform apply and  creates the infrastructure specified.
 
 
-.gcp-auth before-script should run successfully in the pipeline if the workload identity federation is configured as required.
