@@ -25,7 +25,7 @@ The actual implementation for granting impersonation access on the service accou
 * Add a project called “skunkworks” and copy code from [devops skunkworks repo](https://github.com/google/devops-governance/tree/GDC-phase-kickstarter-1/examples/guardrails/gitlab/skunkworks) into it.
 * Available self hosted or SaaS Gitlab runners for each of the gitlab projects to run the pipelines.
 
-Once Gitlab set is completed go to [Folder Factory](../folder-factory)
+Once Gitlab set is completed go to [Folder Factory](./folder-factory)
 
 
 
