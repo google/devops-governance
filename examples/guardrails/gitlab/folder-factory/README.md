@@ -38,6 +38,12 @@ iam:
 ```
 
 Every folder is defined with its own yaml file located in the following [Folder](data/folders).
+Copy "folder.yaml.sample" to "folder_name.yaml"; Name of the yaml file will be used to create folder with the same name.
+Once folder_name.yaml file is created update yaml file
+  * parent - can be another folder or organization
+  * ServiceAccount
+data/folders can have multiple yaml files and a folder will be created for each yaml file.
+
 
 ## How to run this stage
 ### Prerequisites
