@@ -59,7 +59,7 @@ From the folder-factory Gitlab project page
     Add the variables to the pipeline as described in the table below. 
     The same can be accessed from the  README.md file under .gitlab/workflows  in folder-factory. 
 
-| Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
+| Variable                       | Description                                                                                                                                              |Sample value                                                                                                |
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | GCP_PROJECT_ID                 | The GCP project ID of your service account                                                                                                               | sample-project-1122                                                                                             |
 | GCP_SERVICE_ACCOUNT            | The Service Account to be used for creating folders                                                                                                      | xyz@sample-project-1122.iam.gserviceaccount.com                                                                 |
