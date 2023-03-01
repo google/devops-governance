@@ -1,8 +1,13 @@
-This workflow runs terraform pipelines using Gitlab CICD. This document covers the steps to setup Gitlab CICD and provides a high level overview of the stages involved.
 
-This document covers the steps to setup gitlab CICD pipeline for terraform with gitlab SaaS      shared runners.The setup involves setting up gitlab repository and the corresponding CI/CD settings and variables. The pipeline triggers based on select events (like push to specific branches), authenticates to the specified service account using Workload Identity federation and runs the pipeline to deploy infrastructure using terraform in GCP. Please look through the [README](https://github.com/google/devops-governance/blob/GDC-phase-kickstarter-1/README.md) for an overview of the CICD process.
+This workflow covers the steps to setup gitlab CICD pipeline for terraform with gitlab SaaS shared runners.
+The setup involves setting up gitlab repository and the corresponding CI/CD settings and variables. 
+The pipeline triggers based on select events (like push to specific branches), authenticates to the specified service account using Workload Identity federation and runs the pipeline to deploy infrastructure using terraform in GCP. 
+Please look through the [README](https://github.com/google/devops-governance/blob/GDC-phase-kickstarter-1/README.md) for an overview of the CICD process.
 
-
+## High level Architecture
+<p align="center">
+  <img src="highlevel.png" alt="Stages diagram">
+</p>
 
 ## How to Run this stage 
 
