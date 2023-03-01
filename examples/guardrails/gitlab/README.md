@@ -6,6 +6,8 @@ Please look through the [README](https://github.com/google/devops-governance/blo
 ## How to Run this stage 
 
 ## Prerequisites
+* Create a service account? where and what permissions
+* Create a storage bucket? where and what permissions are required?
 * Create a gitlab account
 * Create a Group in gitlab
 
@@ -57,7 +59,8 @@ Please look through the [README](https://github.com/google/devops-governance/blo
 * project-factoy looks for project specifications in yaml format in data/projects
 * There is a sample file provided. Remove "project.yaml.sample" to "<your project name>.yaml"
 * update billing_account_id
-* merge the code into main and pipeline should start.
+* Service Account needs Billing Account User permission" to create the project. At what level should we give the permission
+* Merge the code into main and pipeline should start.
 * Look in troubleshooting section if there are any issues.
 
 ## Overview of the Pipeline stages
