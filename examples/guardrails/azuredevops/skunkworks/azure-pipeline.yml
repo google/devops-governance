@@ -1,102 +1,79 @@
-name: $(Date:yyyyMMdd)$(Rev:.r)
+name: "$(Date:yyyyMMdd)$(Rev:.r)"
 
 trigger:
-  - none
-pool: 
-  vmImage: ubuntu-latest
+  branches:
+    include:
+      - main
+
+
+variables:
+  azureSubscription: "<your subscription>"
+  projectID: "<gcp project>"
+  workloadIdentityPoolProvider: "<pool provider in gcp wif>"
+  Projectnumber: "<gcp project no>"
+  serviceaccount: "<sa in gcp>"
+  workloadIdentityPools: "<pool in gcp wif>"
+
+
+pool:
+  vmImage: "ubuntu-latest"
+
+
 stages:
   - stage: auth
     displayName: "GCP WIF Auth"
     jobs:
       - job: governance_pipeline
-        timeoutInMinutes: 20
+        timeoutInMinutes: 30
         steps:
           - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
-            displayName: install terraform
+            displayName: "Install Terraform"
             inputs:
-              terraformVersion: latest          
+              terraformVersion: "latest"
 
-              # AzureCLI task to retrieve an Azure token for the Service Principal and then exchanges it against a Service Account token using Workload Identity Federation
-        
+ # AzureCLI task to retrieve an Azure token for the Service Principal and then exchanges it against a Service Account token using Workload Identity Federation
           - task: AzureCLI@2
-            displayName: get access token
+            displayName: "Get access token"
             inputs:
-              azureSubscription: 'azuretogcp'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
+              azureSubscription: "$(azureSubscription)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
               inlineScript: |
                 SUBJECT_TOKEN_TYPE="urn:ietf:params:oauth:token-type:jwt"
                 SUBJECT_TOKEN=$(az account get-access-token --query accessToken --output tsv)
                 STS_TOKEN=$(curl --silent -0 -X POST https://sts.googleapis.com/v1/token \
-                    -H 'Content-Type: text/json; charset=utf-8' \
+                    -H "Content-Type: text/json; charset=utf-8" \
                     -d @- <<EOF | jq -r .access_token
                     {
-                        "audience"           : "//iam.googleapis.com/projects/878833087983/locations/global/workloadIdentityPools/azure/providers/azure",
-                        "grantType"          : "urn:ietf:params:oauth:grant-type:token-exchange",
-                        "requestedTokenType" : "urn:ietf:params:oauth:token-type:access_token",
-                        "scope"              : "https://www.googleapis.com/auth/cloud-platform",
-                        "subjectTokenType"   : "$SUBJECT_TOKEN_TYPE",
-                        "subjectToken"       : "$SUBJECT_TOKEN"
+                        "audience": "//iam.googleapis.com/projects/$(Projectnumber)/locations/global/workloadIdentityPools/$(workloadIdentityPoolProvider)/providers/$(workloadIdentityPoolProvider)",
+                        "grantType": "urn:ietf:params:oauth:grant-type:token-exchange",
+                        "requestedTokenType": "urn:ietf:params:oauth:token-type:access_token",
+                        "scope": "https://www.googleapis.com/auth/cloud-platform",
+                        "subjectTokenType": "$SUBJECT_TOKEN_TYPE",
+                        "subjectToken": "$SUBJECT_TOKEN"
                     }
-                EOF)
+                EOF
+                )
                 echo $STS_TOKEN
-                ACCESS_TOKEN=$(curl --silent -0 -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/azure-sa@azuretogcp-374609.iam.gserviceaccount.com:generateAccessToken \
+                ACCESS_TOKEN=$(curl --silent -0 -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/$(serviceaccount)@$(projectID).iam.gserviceaccount.com:generateAccessToken \
                     -H "Content-Type: text/json; charset=utf-8" \
                     -H "Authorization: Bearer $STS_TOKEN" \
                     -d @- <<EOF | jq -r .accessToken
                     {
                         "scope": [ "https://www.googleapis.com/auth/cloud-platform" ]
                     }
-                EOF)
+                EOF
+                )
                 
-                echo "##vso[task.setvariable variable=ACCESS_TOKEN;]$ACCESS_TOKEN"
-                echo $ACCESS_TOKEN 
-          
-          - task: AzureCLI@2
-            displayName: folder-factory
+                echo "##vso[task.setvariable variable=ACCESS_TOKEN]$ACCESS_TOKEN"
+                echo $ACCESS_TOKEN
+
+          - task: downloadgitlabrepository@1
+            displayName: "download repo"
             inputs:
-              azureSubscription: 'azuretogcp'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              workingDirectory: 'examples/guardrails/folder-factory'
-              inlineScript: |
-
-                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
-                
-                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
-                
-                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=azure-sa@azuretogcp-374609.iam.gserviceaccount.com
-                
-                gcloud config set project azuretogcp-374609
-          
-                terraform init
-                
-                terraform plan
-
-                terraform apply --auto-approve  
-
-          - task: AzureCLI@2
-            displayName: project-factory
-            inputs:
-              azureSubscription: 'azuretogcp'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              workingDirectory: 'examples/guardrails/project-factory'
-              inlineScript: |
-
-                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
-                
-                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
-                
-                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=azure-sa@azuretogcp-374609.iam.gserviceaccount.com
-                
-                gcloud config set project azuretogcp-374609
-          
-                terraform init
-                
-                terraform plan
-
-                terraform apply --auto-approve
+              connection: 'Gauravgitlab'
+              definition: '43337570'
+              versionSelector: 'latestDefaultBranch'
 
           - task: AzureCLI@2
             displayName: skunkworks
@@ -111,14 +88,10 @@ stages:
                 
                 export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
                 
-                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=azure-sa@azuretogcp-374609.iam.gserviceaccount.com
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com
                 
-                gcloud config set project azuretogcp-374609
+                gcloud config set project $(projectID)
                 
                 terraform init
-                
                 terraform plan
-
                 terraform apply --auto-approve
-
-         
