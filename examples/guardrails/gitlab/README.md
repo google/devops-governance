@@ -4,10 +4,6 @@ The setup involves setting up gitlab repository and the corresponding CI/CD sett
 The pipeline triggers based on select events (like push to specific branches), authenticates to the specified service account using Workload Identity federation and runs the pipeline to deploy infrastructure using terraform in GCP. 
 Please look through the [README](https://github.com/google/devops-governance/blob/GDC-phase-kickstarter-1/README.md) for an overview of the CICD process.
 
-## High level Architecture
-<p align="center">
-  <img src="highlevel.png" alt="Stages diagram">
-</p>
 
 ## Implementation Process
 
