@@ -96,8 +96,8 @@ The complete workflow comprises of 4 stages and 2 before-script jobs
   * gcp-auth : creates the wif credentials by impersonating the service account.
   * terraform init : initializes terraform in the specified TF_ROOT directory
 * Stages:
- * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
- * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt command
- * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
- * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once the plan is successful. 
+  * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
+  * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt command
+  * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
+  * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once the plan is successful. 
           Runs terraform apply and creates the infrastructure specified.
