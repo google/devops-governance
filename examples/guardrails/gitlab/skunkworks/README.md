@@ -18,7 +18,7 @@ The branch structure should mirror the environments that are going to be deploye
 
 
 ### Installation Steps
-Update the CICD configuration file path in the repository
+1. Update the CICD configuration file path in the repository
     * From the skunkworks Gitlab project page, Navigate to Settings > CICD > expand General pipelines 
     * update CI/CD configuration file value to the relative path of the gitlab-ci.yml file from the root directory
 
