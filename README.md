@@ -30,8 +30,20 @@ To demonstrate how to enforce guardrails in Google Cloud we provide the Guardrai
 Workload identity federation enables applications running outside of Google Cloud to replace long-lived service account keys with short-lived access tokens. 
 This is achieved by configuring Google Cloud to trust an external identity provider, so applications can use the credentials issued by the external identity provider to impersonate a service account.
 
-examples/guardrails section covers different CICD tools and how to leverage Workload Identity Federation between each tool and Google Cloud. 
 
+If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
+
+### High Level Process
+* GCP
+  - Create a Workload Identity Pool
+  - Create a Workload Identity Provider
+  - Create a Service Account and grant permissions
+ 
+* CICD tool
+  - Specify where the pipeline configuration file resides
+  - Configure variables to pass relevant information to GCP to genrate short-lived tokens
+
+examples/guardrails section covers different CICD tools and how to leverage Workload Identity Federation between each tool and Google Cloud. 
 
 ## Disclaimer
 
