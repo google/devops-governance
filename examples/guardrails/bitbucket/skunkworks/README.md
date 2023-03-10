@@ -2,7 +2,7 @@
 
 This is a template for an IaC kickstarter repository.
 
-![Skunkworks](https://user-images.githubusercontent.com/94000358/169810982-36f01de2-e5e5-4ecd-b98e-3cf5a6aa9f81.png)
+<img width="1021" alt="Screenshot 2023-03-10 at 03 12 19" src="https://user-images.githubusercontent.com/94000358/224206800-ac3b8227-863c-4de4-84d4-f1614f92073c.png">
 
 The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. 
 

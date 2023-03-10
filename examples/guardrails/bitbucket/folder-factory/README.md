@@ -2,9 +2,9 @@
 
 This is a template for a DevOps folder factory.
 
-It can be used with [https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory](https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory) and is intended to house the folder configurations:
+It can be used with [https://github.com/google/devops-governance/tree/main/examples/guardrails/bitbucket/project-factory](https://github.com/google/devops-governance/tree/main/examples/guardrails/bitbucket/project-factory) and is intended to house the folder configurations:
 
-![Screenshot 2022-05-10 12 00 19 PM](https://user-images.githubusercontent.com/94000358/169809437-aaa8538e-3ffc-48b3-9028-84e4995de150.png)
+<img width="1002" alt="Screenshot 2023-03-10 at 03 11 31" src="https://user-images.githubusercontent.com/94000358/224206607-18d06f5e-ba19-4b76-bfa5-f0dac3700bfc.png">
 
 Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
 

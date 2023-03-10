@@ -14,22 +14,44 @@ By making use of Gitlab or Github (or any other tools that offer protected branc
 
 DevOps governance will give infrastructure teams the required flexibility whilst still adhering to security requirements with “guardrails”.
 
-## Guardrail Examples
+## Guardrail & pipeline examples for individual workloads
 
-To demonstrate how to enforce guardrails in Google Cloud we provide the Guardrail Examples:
+To demonstrate how to enforce guardrails and pipelines for Google Cloud we provide the "Guardrail Examples". The purpose of these examples is demonstrate how to provision access & guardrails to new workloads with IaC. We provide you with the following 3 different components:
 
--   The [Folder Factory](/examples/guardrails/folder-factory) creates folders and sets guardrails in the form of organisational policies on folders.
+<img width="996" alt="Guardrail Examples" src="https://user-images.githubusercontent.com/94000358/224197342-95270909-49b2-43b4-acb3-fe01a5fe579b.png">
 
--   The [Project Factory](/examples/guardrails/project-factory) sets up projects for teams. For this it creates a deployment service account, links this to a Github repository and defines the roles and permissions that the deployment service account has. 
+-   The *Folder Factory* creates folders and sets guardrails in the form of organisational policies on folders.
 
--   The [Skunkworks - IaC Kickstarter](/examples/guardrails/skunkworks) is a template that can be used to give any new teams a functioning IaC deployment pipeline and repository structure.
+-   The *Project Factory* sets up projects for teams. For this it creates a deployment service account, links this to a Github repository and defines the roles and permissions that the deployment service account has. 
 
-![Guardrail Examples](https://user-images.githubusercontent.com/94000358/169811919-e5c36181-c1d2-4339-8103-d86640e9a1f1.png)
+The Folder Factory and the Project Factory are usually maintained centrally (by a cloud platform team) and used to manage the individual workloads. 
+
+-   The *Skunkworks - IaC Kickstarter* is a template that can be used to give any new teams a functioning IaC deployment pipeline and repository structure.
+
+This template is based on an "ideal" initial pipeline which is as follows:
+
+![Ideal Pipeline Generic](https://user-images.githubusercontent.com/94000358/224196745-4ce7e761-82d4-4eba-b0b2-2912ca73eccb.png)
+
+A video tutorial covering how to set up the guardrails for Github can be found here: https://www.youtube.com/watch?v=bbUNsjk6G7I
+
+The instructions above set out how to implement the Guardrail Examples for Github. We do however also provide support for other platforms.
+
+## Supported Platforms
+
+  - [Bitbucket](/examples/guardrails/bitbucket) 
+  - [Cloudbuild](/examples/guardrails/cloudbuild) 
+  - [Github](/examples/guardrails/github) 
+  - [Gitlab](/examples/guardrails/gitlab) 
+  - [Jenkins](/examples/guardrails/jenkins) 
+  - [Terraform-Cloud](/examples/guardrails/terraform-cloud) 
 
 ## Workload Identity federation 
 Workload identity federation enables applications running outside of Google Cloud to replace long-lived service account keys with short-lived access tokens. 
-This is achieved by configuring Google Cloud to trust an external identity provider, so applications can use the credentials issued by the external identity provider to impersonate a service account.
+This is achieved by configuring Google Cloud to trust an external identity provider, so applications can use the credentials issued by the external identity provider to impersonate a service account. 
 
+The WIF strategy that we employ in our pipelining is to create environment branches for which we then map to service accounts.
+
+![Service Account Example](https://user-images.githubusercontent.com/94000358/224196168-bdab699d-4457-46b0-8e3a-68cfc1e9c3d7.png)
 
 If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
 
