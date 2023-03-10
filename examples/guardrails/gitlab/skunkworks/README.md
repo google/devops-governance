@@ -26,6 +26,10 @@ The branch structure should mirror the environments that are going to be deploye
     * From the skunkworks project page, Navigate to Settings > CICD > expand Variables
     * Add the below variables to the pipeline 
 
+### Terraform config validator
+The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+
+
 | Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | DEV_GCP_PROJECT_ID             | The GCP project ID in which resources are to be created on a push event to dev branch                                                                    | sample-dev-project-1122                                                                                         |

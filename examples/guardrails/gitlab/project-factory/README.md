@@ -74,6 +74,9 @@ CI/CD variables
 Navigate to Settings > CICD > expand Variables
 Add the variables to the pipeline as described in the table below. The same can be accessed from the  README.md file under .gitlab/workflows in project-factory.
 
+### Terraform config validator
+The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+
 | Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | GCP_PROJECT_ID                 | The GCP project ID of your service account                                                                                                               | sample-project-1122                                                                                             |
