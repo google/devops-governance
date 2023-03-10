@@ -34,7 +34,7 @@ This template is based on an "ideal" initial pipeline which is as follows:
 
 A video tutorial covering how to set up the guardrails for Github can be found here: https://www.youtube.com/watch?v=bbUNsjk6G7I
 
-The instructions above set out how to implement the Guardrail Examples for Github. We do however also provide support for other platforms:
+The instructions above set out how to implement the Guardrail Examples for Github. We do however also provide support for other platforms.
 
 ## Supported Platforms
 
