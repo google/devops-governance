@@ -1,4 +1,4 @@
-# Bitbucket guardrail & pipeline example for individual workloads
+# Jenkins guardrail & pipeline example for individual workloads
 
 To demonstrate how to enforce guardrails and pipelines for Google Cloud we provide the "Guardrail Examples". The purpose of these examples is demonstrate how to provision access & guardrails to new workloads with IaC. We provide you with the following 3 different components:
 
