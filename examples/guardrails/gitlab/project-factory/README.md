@@ -74,6 +74,9 @@ CI/CD variables
 Navigate to Settings > CICD > expand Variables
 Add the variables to the pipeline as described in the table below. The same can be accessed from the  README.md file under .gitlab/workflows in project-factory.
 
+### Terraform config validator
+The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+
 | Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | GCP_PROJECT_ID                 | The GCP project ID of your service account                                                                                                               | sample-project-1122                                                                                             |
@@ -82,7 +85,9 @@ Add the variables to the pipeline as described in the table below. The same can 
 | STATE_BUCKET                   | The GCS bucket in which the state is to be centrally managed. The Service account provided above must have access to list and write files to this bucket | sample-terraform-state-bucket                                                                                   |
 | TF_LOG                         | The terraform env variable setting to get detailed logs.  Supports TRACE,DEBUG,INFO,WARN,ERROR in order of decreasing verbosity                          | WARN                                                                                                            |
 | TF_ROOT                        | The directory of the terraform code to be executed.  Can be a path string or also a pre-defined gitlab CI variables                                      | $CI_PROJECT_DIR                                                                                                 |
-| TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6  |                                                                                                          |
+| TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6  |
+| TERRAFORM_POLICY_VALIDATE                         | Set this value as true if terraform vet is to be run against the policy library repository set in $POLICY_LIBRARY_REPO variable                          | true                                                                                                           |
+| POLICY_LIBRARY_REPO                         | The policy library repository URL which will be cloned using git clone to run gcloud terraform vet against.                          | https://github.com/GoogleCloudPlatform/policy-library                                                                                                          |
 
 Similar to Folder factory, 
 
@@ -91,7 +96,7 @@ Once the prerequisites are set up, any commit to the remote main branch with cha
 .gcp-auth before-script should run successfully in the pipeline if the workload identity federation is configured as required.
 
 ### Pipeline Workflow Overview
-The complete workflow comprises of 4 stages and 2 before-script jobs
+The complete workflow comprises of 4-5 stages and 2 before-script jobs
 * before_script jobs :
   * gcp-auth : creates the wif credentials by impersonating the service account.
   * terraform init : initializes terraform in the specified TF_ROOT directory
@@ -99,5 +104,6 @@ The complete workflow comprises of 4 stages and 2 before-script jobs
   * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
   * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt command
   * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
+  * policy-validate: Runs gcloud terraform vet against the terraform code with the constraints in the specified repository.
   * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once the plan is successful. 
           Runs terraform apply and creates the infrastructure specified.

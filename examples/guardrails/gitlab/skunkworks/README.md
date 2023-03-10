@@ -28,6 +28,10 @@ The branch structure should mirror the environments that are going to be deploye
     * From the skunkworks project page, Navigate to Settings > CICD > expand Variables
     * Add the below variables to the pipeline 
 
+### Terraform config validator
+The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+
+
 | Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
 |--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
 | DEV_GCP_PROJECT_ID             | The GCP project ID in which resources are to be created on a push event to dev branch                                                                    | sample-dev-project-1122                                                                                         |
@@ -40,10 +44,12 @@ The branch structure should mirror the environments that are going to be deploye
 | STATE_BUCKET                   | The GCS bucket in which the state is to be centrally managed. The Service account provided above must have access to list and write files to this bucket | sample-terraform-state-bucket                                                                                   |
 | TF_LOG                         | The terraform env variable setting to get detailed logs.  Supports TRACE,DEBUG,INFO,WARN,ERROR in order of decreasing verbosity                          | WARN                                                                                                            |
 | TF_ROOT                        | The directory of the terraform code to be executed.  Can be a path string or also a pre-defined gitlab CI variables                                      | $CI_PROJECT_DIR                                                                                                 |
-| TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6                                                                                                           |                                                                                                          |
+| TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6
+| TERRAFORM_POLICY_VALIDATE                         | Set this value as true if terraform vet is to be run against the policy library repository set in $POLICY_LIBRARY_REPO variable                          | true                                                                                                           |
+| POLICY_LIBRARY_REPO                         | The policy library repository URL which will be cloned using git clone to run gcloud terraform vet against.                          | https://github.com/GoogleCloudPlatform/policy-library                                                                                                           |                                                                                                          |
 
 ## Pipeline Workflow Overview
-The complete workflow contains a parent child pipeline. The parent(.gitlab-ci.yaml) file is the trigger stage for each of the environments. It passes relevant variables for that environment to the child pipeline which executes the core terraform workflow. The child pipeline workflow executes 4 stages and 2 before-script jobs
+The complete workflow contains a parent child pipeline. The parent(.gitlab-ci.yaml) file is the trigger stage for each of the environments. It passes relevant variables for that environment to the child pipeline which executes the core terraform workflow. The child pipeline workflow executes 4-5 stages and 2 before-script jobs
 
 * before_script jobs :
   * gcp-auth : creates the wif credentials by impersonating the service account.
@@ -52,6 +58,7 @@ The complete workflow contains a parent child pipeline. The parent(.gitlab-ci.ya
   * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
   * validate: Runs terraform fmt check and terraform validate. This stage fails if the code is not run against terraform fmt command
   * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts
+  * policy-validate: Runs gcloud terraform vet against the terraform code with the constraints in the specified repository.
   * apply: This step is currently set as manual to be triggered from the Gitlab pipelines UI once the plan is successful. 
            Runs terraform apply and creates the infrastructure specified.
 

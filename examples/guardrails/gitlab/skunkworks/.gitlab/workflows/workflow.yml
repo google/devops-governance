@@ -15,6 +15,7 @@ stages:
   - setup-terraform
   - validate
   - plan
+  - policy-validate
   - apply
 
 .gcp-auth: &gcp-auth
@@ -97,6 +98,38 @@ plan:
       - ${TF_ROOT}/$TF_PLAN_NAME
       - ${TF_ROOT}/$TF_PLAN_JSON
     expire_in: 7 days   #optional. Gitlab stores artifacts of successful pipelines for the most recent commit on each ref. If needed, enable "Keep artifacts from most recent successful jobs"  in CI/CD settings of the repository.
+
+policy-validate:
+  stage: policy-validate
+  dependencies:
+    - setup-terraform
+    - plan
+  before_script:
+    - *gcp-auth
+    - *terraform-ver-init
+    - apt-get install google-cloud-sdk-terraform-tools -y
+    - git clone $POLICY_LIBRARY_REPO $TF_ROOT/policy-repo
+  script:
+    - | 
+      cd $TF_ROOT
+      terraform show --json $TF_PLAN_NAME > $TF_ROOT/tfplan.json
+      ls -l $TF_ROOT/policy-repo
+          violations=$(gcloud beta terraform vet $TF_ROOT/tfplan.json --policy-library=$TF_ROOT/policy-repo --format=json)
+          ret_val=$?
+          if [ $ret_val -eq 2 ];
+          then
+            echo "$violations"
+            echo "Violations found, not proceeding with terraform apply"
+          exit 1
+          elif [ $ret_val -ne 0 ];
+          then
+            echo "Error during gcloud beta terraform vet; not proceeding with terraform apply"
+            exit 1
+          else
+            echo "No policy violations detected; proceeding with terraform apply"
+          fi
+  rules:
+  - if: '$TERRAFORM_POLICY_VALIDATE == "true"'
 
 #Stage:apply | job: apply
 # purpose: executes the plan from the file created in the plan stage
