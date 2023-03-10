@@ -8,7 +8,7 @@ It can be used with https://github.com/google/devops-governance/tree/main/exampl
 
 Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
 
-![Folder Factory](https://user-images.githubusercontent.com/94000358/169809882-f5ff9fb1-d037-49de-8c2c-bf0d457b662f.png)
+<img width="1019" alt="Screenshot 2023-03-10 at 03 09 10" src="https://user-images.githubusercontent.com/94000358/224207311-5317f79c-fdb3-4eb3-97b7-9600c9469c49.png">
 
 The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github.
 
