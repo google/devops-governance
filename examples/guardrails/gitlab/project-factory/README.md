@@ -46,7 +46,7 @@ roles:
     - roles/storage.objectAdmin
     - roles/storage.objectCreator
     - roles/storage.objectViewer
-repo_provider: github
+repo_provider: gitlab
 repo_name: devops-governance/skunkworks
 repo_branch: dev
 ```
