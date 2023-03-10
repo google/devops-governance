@@ -20,13 +20,13 @@ To demonstrate how to enforce guardrails and pipelines for Google Cloud we provi
 
 <img width="996" alt="Guardrail Examples" src="https://user-images.githubusercontent.com/94000358/224197342-95270909-49b2-43b4-acb3-fe01a5fe579b.png">
 
--   The [Folder Factory](/examples/guardrails/github/folder-factory) creates folders and sets guardrails in the form of organisational policies on folders.
+-   The *Folder Factory* creates folders and sets guardrails in the form of organisational policies on folders.
 
--   The [Project Factory](/examples/guardrails/github/project-factory) sets up projects for teams. For this it creates a deployment service account, links this to a Github repository and defines the roles and permissions that the deployment service account has. 
+-   The *Project Factory* sets up projects for teams. For this it creates a deployment service account, links this to a Github repository and defines the roles and permissions that the deployment service account has. 
 
 The Folder Factory and the Project Factory are usually maintained centrally (by a cloud platform team) and used to manage the individual workloads. 
 
--   The [Skunkworks - IaC Kickstarter](/examples/guardrails/github/skunkworks) is a template that can be used to give any new teams a functioning IaC deployment pipeline and repository structure.
+-   The *Skunkworks - IaC Kickstarter* is a template that can be used to give any new teams a functioning IaC deployment pipeline and repository structure.
 
 This template is based on an "ideal" initial pipeline which is as follows:
 
