@@ -2,7 +2,7 @@
 
 To demonstrate how to enforce guardrails and pipelines for Google Cloud we provide the "Guardrail Examples". The purpose of these examples is demonstrate how to provision access & guardrails to new workloads with IaC. We provide you with the following 3 different components:
 
-<img width="996" alt="Guardrail Examples" src="https://user-images.githubusercontent.com/94000358/224197342-95270909-49b2-43b4-acb3-fe01a5fe579b.png">
+<img width="1001" alt="Github" src="https://user-images.githubusercontent.com/94000358/224201163-657d26e8-c351-4e9a-89f4-929a4bf248b6.png">
 
 -   The [Folder Factory](folder-factory) creates folders and sets guardrails in the form of organisational policies on folders.
 
