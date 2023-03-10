@@ -4,7 +4,9 @@ This is a template for an IaC kickstarter repository.
 
 <img width="1024" alt="Screenshot 2023-03-10 at 03 09 49" src="https://user-images.githubusercontent.com/94000358/224205779-f773915b-39d7-4019-a677-a36cebe9edc8.png">
 
-The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. 
+The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. It is based on the following "ideal" pipeline:
+
+![Ideal Pipeline](https://user-images.githubusercontent.com/94000358/224206360-28c97f5d-603f-4f63-beeb-595bcee6039d.png)
 
 This template creates a bucket in the specified target environment.
 
