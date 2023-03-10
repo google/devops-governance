@@ -14,7 +14,7 @@ The Folder Factory and the Project Factory are usually maintained centrally (by 
 
 This template is based on an "ideal" initial pipeline which is as follows:
 
-![Ideal Pipeline Generic](https://user-images.githubusercontent.com/94000358/224196745-4ce7e761-82d4-4eba-b0b2-2912ca73eccb.png)
+![Cloud Build](https://user-images.githubusercontent.com/94000358/224201056-3331e1d9-d833-43ba-b322-1b11387f033a.png)
 
 A video tutorial covering how to set up the guardrails for Github can be found here: https://www.youtube.com/watch?v=bbUNsjk6G7I
 
