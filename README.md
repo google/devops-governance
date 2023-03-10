@@ -18,7 +18,7 @@ DevOps governance will give infrastructure teams the required flexibility whilst
 
 To demonstrate how to enforce guardrails and pipelines for Google Cloud we provide the "Guardrail Examples". The purpose of these examples is demonstrate how to provision access & guardrails to new workloads with IaC. We provide you with the following 3 different components:
 
-![Guardrail Examples](https://user-images.githubusercontent.com/94000358/169811919-e5c36181-c1d2-4339-8103-d86640e9a1f1.png)
+<img width="1002" alt="Guardrail Examples" src="https://user-images.githubusercontent.com/94000358/224196862-cf987364-7747-48f8-825f-f1c304fa93ca.png">
 
 -   The [Folder Factory](/examples/guardrails/github/folder-factory) creates folders and sets guardrails in the form of organisational policies on folders.
 
@@ -30,7 +30,7 @@ The Folder Factory and the Project Factory are usually maintained centrally (by 
 
 This template is based on an "ideal" initial pipeline which is as follows:
 
-![Ideal Pipeline Generic](https://user-images.githubusercontent.com/94000358/224195779-1f349578-9054-4db1-a9ac-5aa68505157c.png)
+![Ideal Pipeline Generic](https://user-images.githubusercontent.com/94000358/224196745-4ce7e761-82d4-4eba-b0b2-2912ca73eccb.png)
 
 A video tutorial covering how to set up the guardrails for Github can be found here: https://www.youtube.com/watch?v=bbUNsjk6G7I
 
