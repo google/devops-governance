@@ -2,7 +2,7 @@
 
 This is a template for a DevOps project factory.
 
-It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory) and is intended to house the projects of a specified folder:
+It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/github/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/github/folder-factory) and is intended to house the projects of a specified folder:
 
 <img width="1466" alt="Overview" src="https://user-images.githubusercontent.com/94000358/161531177-23a99468-1e7b-4583-a243-624ee4663506.png">
 
