@@ -1,4 +1,4 @@
-> A more comprehensive description of DevOps & GitOps principles can be found at [DevOps README](./../README.md). The module adopts the same principles and details instructions for Gitlab.
+> A more comprehensive description of DevOps & GitOps principles can be found at [DevOps README](./../../../README.md). The module adopts the same principles and details instructions for Gitlab.
 
 # Getting started
 
