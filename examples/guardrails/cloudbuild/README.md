@@ -18,7 +18,7 @@ Note: SSH access on the gitlab repository should be given to allow users on the 
 
 1. Follow the steps here to complete the ssh key setup and cloud build trigger creation and Gitlab webhook setup, which involves following steps:
 * Follow the steps in this document to create ssh keys. 
--   The ssh keys are required to access the gitlab repository code, these ssh keys are added in the GCP secret manager, which is then retrieved in the cloud build inline configuration to clone the gitlab repository.
+  * The ssh keys are required to access the gitlab repository code, these ssh keys are added in the GCP secret manager, which is then retrieved in the cloud build inline configuration to clone the gitlab repository.
 * Add your public ssh access keys on gitlab.
 - This step allows the ssh keys access to clone the gitlab repository in cloud build jobs.
 * Add ssh key credentials in Secret Manager.
