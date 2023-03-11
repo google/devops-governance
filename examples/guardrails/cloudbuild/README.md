@@ -29,7 +29,8 @@ Note: SSH access on the gitlab repository should be given to allow users on the 
      * Using the webhook URL generated on cloudbuild side, configure the hook on Gitlab. 
 
 2. (Optional) Use the test feature on the Gitlab webhook section to make sure changes on Gitlab send a trigger to cloudbuild. 
-The cloud build webhook created with sample cloud build inline configuration can be triggered to validate the working of the webhook trigger. Navigate to Cloudbuild > Settings > Webhooks page to send the webhook trigger event by clicking the push event(or the event for which the gitlab trigger is configured):
+  * The cloud build webhook created with sample cloud build inline configuration can be triggered to validate the working of the webhook trigger. 
+  * Navigate to Cloudbuild > Settings > Webhooks page to send the webhook trigger event by clicking the push event(or the event for which the gitlab trigger is configured):
 
 IMAGE 
 
