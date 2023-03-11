@@ -16,8 +16,8 @@ Note: SSH access on the gitlab repository should be given to allow users on the 
 
 ### Setup SSH Keys
 
-1. Follow the steps here to complete the ssh key setup and cloud build trigger creation and Gitlab webhook setup, which involves following steps:
-   * Follow the steps in this document to create ssh keys. 
+1. Follow the steps [here](https://cloud.google.com/build/docs/automating-builds/gitlab/build-repos-from-gitlab#setting_up) to complete the ssh key setup and cloud build trigger creation and Gitlab webhook setup, which involves following steps:
+   * Create ssh keys. 
      * The ssh keys are required to access the gitlab repository code, these ssh keys are added in the GCP secret manager, which is then retrieved in the cloud build inline configuration to clone the gitlab repository.
    * Add your public ssh access keys on gitlab.
      * This step allows the ssh keys access to clone the gitlab repository in cloud build jobs.
@@ -27,6 +27,7 @@ Note: SSH access on the gitlab repository should be given to allow users on the 
      * This webhook trigger is responsible for running the CICD job to deploy the terraform code. Note: This step also involves creating a GCP secret version which is different from the secret created in step 1.c. This secret is used by the cloud build webhook URL to send webhook events from gitlab.
    * Create a webhook in Gitlab 
      * Using the webhook URL generated on cloudbuild side, configure the hook on Gitlab. 
+
 2. (Optional) Use the test feature on the Gitlab webhook section to make sure changes on Gitlab send a trigger to cloudbuild. 
 The cloud build webhook created with sample cloud build inline configuration can be triggered to validate the working of the webhook trigger. Navigate to Cloudbuild > Settings > Webhooks page to send the webhook trigger event by clicking the push event(or the event for which the gitlab trigger is configured):
 
