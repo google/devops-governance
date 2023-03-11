@@ -37,7 +37,12 @@ A video tutorial covering how to set up the guardrails for Github can be found h
 The instructions above set out how to implement the Guardrail Examples for Github. We do however also provide support for other platforms.
 
 
-## Workload Identity federation 
+## Workload Identity federation
+
+Traditionally, applications running outside Google Cloud (like CICD tools) can use service account keys to access Google Cloud resources. However, service account keys are powerful credentials, and can present a security risk if they are not managed correctly.
+
+With identity federation, you can use Identity and Access Management (IAM) to grant external identities IAM roles, including the ability to impersonate service accounts. This approach eliminates the maintenance and security burden associated with service account keys.
+
 Workload identity federation enables applications running outside of Google Cloud to replace long-lived service account keys with short-lived access tokens. 
 This is achieved by configuring Google Cloud to trust an external identity provider, so applications can use the credentials issued by the external identity provider to impersonate a service account. 
 
