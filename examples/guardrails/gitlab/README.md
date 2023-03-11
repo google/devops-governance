@@ -1,11 +1,11 @@
-> A more comprehensive description of DevOps & GitOps principles can be found at [DevOps README](./../../../README.md). The module adopts the same principles and details instructions for Gitlab.
 
 # Getting started
 
 This workflow covers the steps to setup gitlab CICD pipeline for terraform with gitlab SaaS shared runners.
 The setup involves setting up gitlab repository and the corresponding CI/CD settings and variables. 
 The pipeline triggers based on select events (like push to specific branches), authenticates to the specified service account using Workload Identity federation and runs the pipeline to deploy infrastructure using terraform in GCP. 
-Please look through the [README](https://github.com/google/devops-governance/blob/GDC-phase-kickstarter-1/README.md) for an overview of the CICD process.
+
+> A more comprehensive description of DevOps & GitOps principles can be found at [DevOps README](./../../../README.md). 
 
 ## Implementation Process
 
