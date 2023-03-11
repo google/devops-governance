@@ -62,7 +62,7 @@ If you do require additional assitance to setup Workload Identity Federation hav
   - Specify where the pipeline configuration file resides
   - Configure variables to pass relevant information to GCP to genrate short-lived tokens
 
-[examples/guardrails](/examples/guardrails) section covers different CICD tools and how to leverage Workload Identity Federation between each tool and Google Cloud. 
+[examples/guardrails](/examples/guardrails) section covers different CICD tools and how to leverage Workload Identity Federation. 
 
 ## Supported Platforms
 
