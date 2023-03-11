@@ -36,14 +36,6 @@ A video tutorial covering how to set up the guardrails for Github can be found h
 
 The instructions above set out how to implement the Guardrail Examples for Github. We do however also provide support for other platforms.
 
-## Supported Platforms
-
-  - [Bitbucket](/examples/guardrails/bitbucket) 
-  - [Cloudbuild](/examples/guardrails/cloudbuild) 
-  - [Github](/examples/guardrails/github) 
-  - [Gitlab](/examples/guardrails/gitlab) 
-  - [Jenkins](/examples/guardrails/jenkins) 
-  - [Terraform-Cloud](/examples/guardrails/terraform-cloud) 
 
 ## Workload Identity federation 
 Workload identity federation enables applications running outside of Google Cloud to replace long-lived service account keys with short-lived access tokens. 
@@ -65,8 +57,17 @@ If you do require additional assitance to setup Workload Identity Federation hav
   - Specify where the pipeline configuration file resides
   - Configure variables to pass relevant information to GCP to genrate short-lived tokens
 
-examples/guardrails section covers different CICD tools and how to leverage Workload Identity Federation between each tool and Google Cloud. 
+[examples/guardrails](/examples/guardrails) section covers different CICD tools and how to leverage Workload Identity Federation between each tool and Google Cloud. 
 
+## Supported Platforms
+
+  - [Bitbucket](/examples/guardrails/bitbucket) 
+  - [Cloudbuild](/examples/guardrails/cloudbuild) 
+  - [Github](/examples/guardrails/github) 
+  - [Gitlab](/examples/guardrails/gitlab) 
+  - [Jenkins](/examples/guardrails/jenkins) 
+  - [Terraform-Cloud](/examples/guardrails/terraform-cloud) 
+  
 ## Disclaimer
 
 This is not an officially supported Google product.
