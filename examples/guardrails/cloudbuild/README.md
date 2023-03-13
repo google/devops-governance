@@ -32,7 +32,8 @@ Gitlab repository can be build with Cloud build by webhook triggers. Following a
   * The cloud build webhook created with sample cloud build inline configuration can be triggered to validate the working of the webhook trigger. 
   * Navigate to Cloudbuild > Settings > Webhooks page to send the webhook trigger event by clicking the push event(or the event for which the gitlab trigger is configured):
 
-IMAGE 
+![webhook](https://user-images.githubusercontent.com/105412459/224610214-4d1b1988-e7ce-4e6a-9b01-09db3059cb8e.png)
+
 
   * This will invoke the cloud build job in the GCP console.
 
