@@ -26,4 +26,4 @@ iam:
 
 Every folder is defined with its own yaml file located in the following [Folder](data/folders).
 
-> Detailed instructions of CloudBuild trigger setup can be found at [README](./../../../README.md).
+> Detailed instructions of CloudBuild trigger setup can be found at [README](./../README.md).
