@@ -38,4 +38,4 @@ repo_branch: dev
 
 Every project is defined with its own file located in the [Project Folder](data/projects).
 
-> Detailed instructions of CloudBuild trigger setup can be found at [README](./../../../README.md).
+> Detailed instructions of CloudBuild trigger setup can be found at [README](./README.md).
