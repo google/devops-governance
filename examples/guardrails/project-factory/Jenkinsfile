@@ -3,7 +3,7 @@ pipeline {
     agent any
      environment {
       BUCKET_PATH = credentials('backend-path')
-     
+      policy_file_path = credentials('policy_file_path')
 
   }
 
@@ -22,16 +22,38 @@ pipeline {
       }
     }
 
-        stage('Terraform') {
+        stage('Terraform Plan') {
             steps {
               
                 sh '''
                  cd guardrails/project-factory
                 terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=project-factory-staging-tfstate" -var-file="staging.tfvars"
-                terraform plan -var-file="staging.tfvars" 
-                terraform apply -var-file="staging.tfvars"  -auto-approve
+                terraform plan -var-file="staging.tfvars"  -out pfjenkins.tfplan
+               
                   
               '''
+              
+            }
+        }
+       stage('Terraform Validate') {
+            steps {
+             
+               sh '''
+                 cd guardrails/project-factory
+                 terraform show -json "pfjenkins.tfplan" > "ffjenkins.json" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${PROJECT_NAME}" 
+                gcloud beta terraform vet "pfjenkins.json" --policy-library="${policy_file_path}" --project="${PROJECT_NAME}" 
+                '''
+              
+            }
+        }
+       stage('Terraform Apply') {
+            steps {
+             
+               sh '''
+                 cd guardrails/project-factory
+                 terraform apply -var-file="staging.tfvars"  -auto-approve 
+                '''
               
             }
         }
