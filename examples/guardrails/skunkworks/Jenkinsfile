@@ -68,8 +68,8 @@ pipeline {
                sh '''
                  cd guardrails/skunkworks
                  terraform show -json "swjenkins.tfplan" > "swjenkins.json" 
-                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${sw-project-number}" 
-                gcloud beta terraform vet "swjenkins.json" --policy-library="${policy_file_path}" --project="${sw-project-number}" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${SW_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "swjenkins.json" --policy-library="${policy_file_path}" --project="${SW_PROJECT_NUMBER}" 
                 '''
               
             }
