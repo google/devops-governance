@@ -9,6 +9,7 @@ pipeline {
     workload_identity_pool_id = credentials('wif_pool_id')
     workload_identity_pool_provider_id = credentials('wif_pool_provider_id')
     SERVICE_ACCOUNT_NAME = credentials('sa-name')
+    policy_file_path = credentials('policy_file_path')
 
   }
     options {
@@ -50,21 +51,44 @@ pipeline {
         checkout scm
       }
     }
-        stage('Terraform') {
+        stage('Terraform Plan') {
             steps {
              
                sh '''
                  cd guardrails/folder-factory
                 terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=${REPO_FULL_NAME}" 
-                terraform plan
-                terraform apply -auto-approve
+                terraform plan -input=false -out ffjenkins.tfplan
+               
                   
               '''
               
             }
         }
         
-       
+       stage('Terraform Validate') {
+            steps {
+             
+               sh '''
+                 cd guardrails/folder-factory
+                 terraform show -json "ffjenkins.tfplan" > "ffjenkins.json" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${PROJECT_NAME}" 
+                gcloud beta terraform vet "ffjenkins.json" --policy-library="${policy_file_path}" --project="${PROJECT_NAME}" 
+
+                '''
+              
+            }
+        }
+       stage('Terraform Apply') {
+            steps {
+             
+               sh '''
+                 cd guardrails/folder-factory
+                terraform apply -auto-approve
+
+                '''
+              
+            }
+        }
     }   
 }
 
