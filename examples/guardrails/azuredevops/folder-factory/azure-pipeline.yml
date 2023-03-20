@@ -3,16 +3,17 @@ name: "$(Date:yyyyMMdd)$(Rev:.r)"
 trigger:
   branches:
     include:
-      - main
+      - none
 
 
 variables:
-  azureSubscription: "<your subscription>"
-  projectID: "<gcp project>"
-  workloadIdentityPoolProvider: "<pool provider in gcp wif>"
-  Projectnumber: "<gcp project no>"
-  serviceaccount: "<sa in gcp>"
-  workloadIdentityPools: "<pool in gcp wif>"
+  azureSubscription: "azuretogcp"
+  projectID: "azuretogcp-374609"
+  workloadIdentityPoolProvider: "azure"
+  Projectnumber: "878833087983"
+  serviceaccount: "azure-sa"
+  workloadIdentityPools: "azure"
+  policyValidate: "true"
 
 
 pool:
@@ -23,7 +24,7 @@ stages:
   - stage: auth
     displayName: "GCP WIF Auth"
     jobs:
-      - job: governance_pipeline
+      - job: governance_pipeline_azure
         timeoutInMinutes: 30
         steps:
           - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
@@ -67,16 +68,10 @@ stages:
                 
                 echo "##vso[task.setvariable variable=ACCESS_TOKEN]$ACCESS_TOKEN"
                 echo $ACCESS_TOKEN
-
-          - task: downloadgitlabrepository@1
-            displayName: "download repo"
-            inputs:
-              connection: 'Gauravgitlab'
-              definition: '43337570'
-              versionSelector: 'latestDefaultBranch'
+            
 
           - task: AzureCLI@2
-            displayName: "Folder factory"
+            displayName: "Terraform plan"
             inputs:
               azureSubscription: "$(azureSubscription)"
               scriptType: "bash"
@@ -86,9 +81,66 @@ stages:
                 
                 export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
                 export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
-                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
                 gcloud config set project $(projectID)
+
                 terraform init
-                terraform validate
-                terraform plan
-                terraform apply --auto-approve
+              
+                terraform plan -out=test.tfplan
+
+                terraform show -json ./test.tfplan > ./tfplan.json
+                
+          - task: AzureCLI@2
+            displayName: "Policy Validate"
+            condition: eq(variables.policyValidate,'true')
+            inputs:
+              azureSubscription: "$(azureSubscription)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              workingDirectory: "examples/guardrails/folder-factory"
+              inlineScript: |
+                
+                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
+                gcloud config set project $(projectID)  
+
+                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+                curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+                sudo apt-get update 
+                sudo apt-get install -y google-cloud-sdk-terraform-tools
+
+                git clone https://github.com/GoogleCloudPlatform/policy-library.git ./policy-library
+
+                cd ./policy-library 
+                #&& cp samples/iam_service_accounts_only.yaml policies/constraints
+
+                gcloud beta terraform vet ../tfplan.json --policy-library=. --format=json
+                violations=$(gcloud beta terraform vet ../tfplan.json --policy-library=. --format=json)
+                ret_val=$?
+                if [ $ret_val -eq 2 ]; then
+                  echo "$violations"
+                  echo "Violations found, not proceeding with terraform apply"
+                exit 1
+                elif [ $ret_val -ne 0 ]; then
+                  echo "Error during gcloud beta terraform vet; not proceeding with terraform apply"
+                  exit 1
+                else
+                  echo "No policy violations detected; proceeding with terraform apply"
+                fi 
+
+          - task: AzureCLI@2
+            displayName: "Terraform apply"
+            inputs:
+              azureSubscription: "$(azureSubscription)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              workingDirectory: "examples/guardrails/folder-factory"
+              inlineScript: |
+                
+                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
+                gcloud config set project $(projectID) 
+                terraform apply -auto-approve ./test.tfplan 
