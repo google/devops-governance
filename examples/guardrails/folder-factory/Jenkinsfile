@@ -71,8 +71,8 @@ pipeline {
                sh '''
                  cd guardrails/folder-factory
                  terraform show -json "ffjenkins.tfplan" > "ffjenkins.json" 
-                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${PROJECT_NAME}" 
-                gcloud beta terraform vet "ffjenkins.json" --policy-library="${policy_file_path}" --project="${PROJECT_NAME}" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "ffjenkins.json" --policy-library="${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
 
                 '''
               
