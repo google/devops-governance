@@ -41,8 +41,8 @@ pipeline {
                sh '''
                  cd guardrails/project-factory
                  terraform show -json "pfjenkins.tfplan" > "ffjenkins.json" 
-                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${PROJECT_NAME}" 
-                gcloud beta terraform vet "pfjenkins.json" --policy-library="${policy_file_path}" --project="${PROJECT_NAME}" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "pfjenkins.json" --policy-library="${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
                 '''
               
             }
