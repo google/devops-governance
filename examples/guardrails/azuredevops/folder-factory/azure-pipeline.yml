@@ -7,13 +7,13 @@ trigger:
 
 
 variables:
-  azureSubscription: "azuretogcp"
-  projectID: "azuretogcp-374609"
-  workloadIdentityPoolProvider: "azure"
-  Projectnumber: "878833087983"
-  serviceaccount: "azure-sa"
-  workloadIdentityPools: "azure"
-  policyValidate: "true"
+  azureserviceconnection: "service connection name between azure devops and gcp"
+  projectID: "gcp project ID"
+  workloadIdentityPoolProvider: "pool provider in gcp wif"
+  Projectnumber: "gcp project no"
+  serviceaccount: "sa in gcp"
+  workloadIdentityPools: "pool in gcp wif"
+  policyValidate: "true/false"
 
 
 pool:
@@ -36,7 +36,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Get access token"
             inputs:
-              azureSubscription: "$(azureSubscription)"
+              azureserviceconnection: "$(azureserviceconnection)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -73,7 +73,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Terraform plan"
             inputs:
-              azureSubscription: "$(azureSubscription)"
+              azureserviceconnection: "$(azureserviceconnection)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"
@@ -94,7 +94,7 @@ stages:
             displayName: "Policy Validate"
             condition: eq(variables.policyValidate,'true')
             inputs:
-              azureSubscription: "$(azureSubscription)"
+              azureserviceconnection: "$(azureserviceconnection)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"
@@ -133,7 +133,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Terraform apply"
             inputs:
-              azureSubscription: "$(azureSubscription)"
+              azureserviceconnection: "$(azureserviceconnection)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"
