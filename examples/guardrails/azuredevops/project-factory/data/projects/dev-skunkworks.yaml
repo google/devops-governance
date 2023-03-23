@@ -1,0 +1,28 @@
+billing_account_id: 01EDB8-9273DF-AA9623
+
+roles:
+    - roles/viewer
+    - roles/iam.serviceAccountUser
+    - roles/iam.securityReviewer
+    - roles/monitoring.viewer
+    - roles/monitoring.editor
+    - roles/monitoring.alertPolicyViewer
+    - roles/monitoring.alertPolicyEditor
+    - roles/monitoring.dashboardViewer
+    - roles/monitoring.dashboardEditor
+    - roles/monitoring.notificationChannelViewer
+    - roles/monitoring.notificationChannelEditor
+    - roles/monitoring.servicesViewer
+    - roles/monitoring.servicesEditor
+    - roles/monitoring.uptimeCheckConfigViewer
+    - roles/monitoring.uptimeCheckConfigEditor
+    - roles/secretmanager.viewer
+    - roles/secretmanager.secretVersionManager
+    - roles/secretmanager.admin
+    - roles/storage.admin
+    - roles/storage.objectAdmin
+    - roles/storage.objectCreator
+    - roles/storage.objectViewer
+repo_provider: azuredevops
+repo_name: devops-governance.git
+repo_branch: dev
