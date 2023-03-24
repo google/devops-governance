@@ -167,7 +167,7 @@ pipelines:
             - /usr/bin/terraform plan -out $TF_PLAN_NAME 
             - /usr/bin/terraform show --json $TF_PLAN_NAME  > $TF_ROOT/tfplan.json
             - violations=$(gcloud beta terraform vet $TF_ROOT/tfplan.json --policy-library=$TF_ROOT/policy-repo --format=json)
-            -  ret_val=$?
+            - ret_val=$?
             - if [ $ret_val -eq 2 ]; then
             -    if [ "$violations" != "[]" ] ; then 
             -      echo "$violations"
