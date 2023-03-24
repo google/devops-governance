@@ -65,9 +65,12 @@ pipelines:
             -  ret_val=$?
             -  if [ $ret_val -eq 2 ];
             -  then
-            -    echo "$violations"
-            -    echo "Violations found, not proceeding with terraform apply"
-            -  exit 1
+            -    if [ "$violations" != "[]" ] ;
+            -       then 
+            -         echo "$violations"
+            -         echo "Violations found, not proceeding with terraform apply" 
+            -         exit 1
+            -    fi
             -  elif [ $ret_val -ne 0 ];
             -  then
             -    echo "Error during gcloud beta terraform vet; not proceeding with terraform apply"
