@@ -63,16 +63,13 @@ pipelines:
             - /usr/bin/terraform show --json $TF_PLAN_NAME  > $TF_ROOT/tfplan.json
             - violations=$(gcloud beta terraform vet $TF_ROOT/tfplan.json --policy-library=$TF_ROOT/policy-repo --format=json)
             -  ret_val=$?
-            -  if [ $ret_val -eq 2 ];
-            -  then
-            -    if [ "$violations" != "[]" ] ;
-            -       then 
-            -         echo "$violations"
-            -         echo "Violations found, not proceeding with terraform apply" 
-            -         exit 1
+            - if [ $ret_val -eq 2 ]; then
+            -    if [ "$violations" != "[]" ] ; then 
+            -      echo "$violations"
+            -      echo "Violations found, not proceeding with terraform apply" 
+            -      exit 1
             -    fi
-            -  elif [ $ret_val -ne 0 ];
-            -  then
+            -  elif [ $ret_val -ne 0 ]; then
             -    echo "Error during gcloud beta terraform vet; not proceeding with terraform apply"
             -    exit 1
             -  else
