@@ -16,6 +16,8 @@
  
 terraform {
   backend "gcs" {
+    bucket = "<Bucket>"
+    prefix = "<Bucket prefix>" #ex: bucket/project-factory
   }
 }
 

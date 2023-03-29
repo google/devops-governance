@@ -1,127 +1,95 @@
 # Project Factory
 
-This is a template for a DevOps project factory.
+This repo will deploy new projects and the necessary resources to use  Workload Identity Federation with Bitbucket. Inside the repo is a subdirectory structure `data/projects` that contain yaml files. Each yaml file contains the definition of a new project. Each project deployed will also create a new Workload Identity Pool and provider. The created pool ID and provider are included in the terraform outputs.
 
-It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/bitbucket/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/bitbucket/folder-factory) and is intended to house the projects of a specified folder:
+This repo is intend to be deployed manually.
 
-<img width="1466" alt="Overview" src="https://user-images.githubusercontent.com/94000358/161531177-23a99468-1e7b-4583-a243-624ee4663506.png">
+## Deployment 
 
-Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
+### Authentication
 
-<img width="1000" alt="Screenshot 2023-03-10 at 03 11 54" src="https://user-images.githubusercontent.com/94000358/224206731-fbdba755-edc5-4a3a-ae0d-393e239dd864.png">
+project-factory should be deployed outside of the normal pipeline process. Workload Identity Federation, which will authorize Bitbucket pipelines to communicate with GCP, will not be configured until after this repository is fully deployed.
 
-The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github.
+Since this is being deployed outside of the pipeline environment, authentication will need to be established separately. If deploying locally, this can be done with
 
-## Repository Configuration
-This repository does not need any additional runners (uses Github runners) and does require you to previously setup Workload Identity Federation to authenticate.
-
-If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
-
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
-
-<img width="785" alt="Secret settings" src="https://user-images.githubusercontent.com/94000358/161528557-41446670-1e3b-4ea1-996d-e377e53d9c43.png">
-
-or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
-```
-env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  FOLDER: 'folders/XXXX'
-  # The folder under which the projects should be created
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
+```bash
+gcloud auth login
 ```
 
-## Setting up projects
+Alternatively, [CloudShell](https://cloud.google.com/shell) can be used for an easy environment that is already GCP authenticated.
 
-The project factory will:
-- create a service account with defined rights
-- create a project within the folder
-- connect the service account to the Github repository informantion
+The user who is authenticated should have permissions in GCP IAM to create projects and attach them to the correct billing account. Additionally, the user needs the permissions to create and manage Workload Identity Federation pools and providers. If desired, a Service Account may be used that has the required permissions. See [Impersonating Service Accounts](https://cloud.google.com/iam/docs/impersonating-service-accounts) for more information.
 
-It uses YAML configuration files for every project with the following sample structure:
-```
-billing_account_id: XXXXXX-XXXXXX-XXXXXX
-roles:
-    - roles/viewer
-    - roles/iam.serviceAccountUser
-    - roles/iam.securityReviewer
-    - roles/monitoring.viewer
-    - roles/monitoring.editor
-    - roles/monitoring.alertPolicyViewer
-    - roles/monitoring.alertPolicyEditor
-    - roles/monitoring.dashboardViewer
-    - roles/monitoring.dashboardEditor
-    - roles/monitoring.notificationChannelViewer
-    - roles/monitoring.notificationChannelEditor
-    - roles/monitoring.servicesViewer
-    - roles/monitoring.servicesEditor
-    - roles/monitoring.uptimeCheckConfigViewer
-    - roles/monitoring.uptimeCheckConfigEditor
-    - roles/secretmanager.viewer
-    - roles/secretmanager.secretVersionManager
-    - roles/secretmanager.admin
-    - roles/storage.admin
-    - roles/storage.objectAdmin
-    - roles/storage.objectCreator
-    - roles/storage.objectViewer
-repo_provider: github
-repo_name: devops-governance/skunkworks
-repo_branch: dev
+
+### Terraform 
+
+After authentication, the Terraform can be deployed. Navigate to the root of the project-factory repository.
+
+```bash
+cd project-factory
 ```
 
-Every project is defined with its own file located in the [Project Folder](data/projects).
+Before Terraform can be initialized, Terraform needs to be directed on where to store the state file within Google Cloud Storage. Open the file named `providers.tf` and populate values for bucket and prefix. The modified file should resemble the following:
 
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "your-bucket-name"
+    prefix = "path/to/state/file/"
+  }
+}
 
+# ...
+```
 
-## How to run this stage
-### Prerequisites
+The bucket value should be the name of a bucket already in GCP. The prefix value is optional, but can be used to define a directory structure within the bucket to store the state file.
 
-Workload Identity setup between the folder factory gitlab repositories and the GCP Identity provider configured with a service account containing required permissions to create folders and their organizational policies. There is a sample code provided in “folder.yaml.sample” to create a folder and for terraform to create a folder minimum below permissions are required. 
-“Folder Creator” or “Folder Admin” at org level
-“Organization Policy Admin” at org level
+After this change is made, Terraform can be initialized.
 
+```bash
+terraform init
+```
 
-### Installation Steps
-From the folder-factory Gitlab project page
-* CICD configuration file path 
-    Navigate to Pipelines > Run Pipeline > select branch > select pipeline
-    Update “CI/CD configuration file” to point to the root of repository, `bitbucket-pipelines.yml`
+Here is where you would want to add, change, or modify any of the yaml files in the `data/projects` directory. For more information, see the sample yaml provided. Each yaml file contains the definition of a new GCP project.
 
-* CI/CD variables
-    Navigate to Deployments > Configure > Add Variables
-    Add the variables to the pipeline as described in the table below. 
+Before the Terraform can be applied, there is one more section that will require information. In the root of the project-factory repo there must exist a file named terraform.tfvars. This is where variables need to be populated that apply to all projects. The following values need to be provided:
 
-### Terraform config validator
-The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+| Variable | Description | Example Value |
+|-|-|-|
+|`folder`|Folder ID of where to deploy the project |`"folders/98765432101"`|
+|`folder`|GCP billing account to attach projects to = |`"018888-01888-ABC123"`|
+|`folder`|Name of workspace in Bitbucket |`"bbworkspace"`|
+|`folder`|List of audience tokens provided by Bitbucket. See below for additional details. |`["ari:cloud:bitbucket::workspace/000000ee-1111-11ae-bbbb-1111aeeee111"]`|
 
+#### `allowed_audiences` Value
 
-| Variable                      |                                                                                                                                                        | Example Value                                 |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
-| TERRAFORM_VERSION             | Version of Terraform to execute. Terraform will be installed at the beginning of every job.                                                            | 1.3.7                                         |
-| PROJECT_NAME                  | The project containing the service account that has permission to communicate with the WIF provider. Should be created as part of Project Factory.     | bitbucket-connect-prj                         |
-| GCP_PROJECT_NUMBER            | Project number for the project that hosts the WIF provider                                                                                             | 107999111999                                  |
-| SERVICE_ACCOUNT_NAME          | The name of the service account that will be used to deploy. Must be hosted in PROJECT_NAME.                                                           | bb-service-acct                               |
-| BUCKET_PATH                   | A state bucket that will hold the terraform state. This bucket must previously exist and the service account must have permission to read/write to it. | gcs-state-bucket-name                         |
-| POLICY_LIBRARY_REPO           | https://github.com/GoogleCloudPlatform/policy-library                                                                                                  | The public repo where the policies are hosted |
-| TERRAFORM_POLICY_VALIDATE     | This is a flag that should be set to “true” in order to enable the policy validation                                                                   | Should be set to “true” to enable validation  |
-| workload_identity_pool_id     |                                                                                                                                                        | bitbucket-test-pool                           |
-| workload_identity_provider_id |                                                                                                                                                        | bitbucket-test-provider                       |                                                                                                |
+The audience token ensures Bitbucket pipelines are allowed to authenticate via Workload Identity. Its value can be retrieved after creating a repository. It is important to note that the “audience” value is tied to the Bitbucket Workspace, meaning all repos in the same Bitbucket workspace will have the same audience value.  If an organization uses multiple workspaces, the audience value will need to be retrieved for each.
 
-* Once the prerequisites are set up, any commit to the remote main branch with changes to  *.tf, *.tfvars, data/*, modules/* files should trigger the pipeline.  
+For the purposes of this example, we will create a repo in Bitbucket “skunkworks” that will later be populated with terraform. 
 
+In bitbucket, create the new repository. Aftwards, Bitbucket pipelines will need to be enabled. Go to the repository settings and look for **Pipelines** > **Settings** and check **Enable Pipelines**. 
 
-* get_oidctoken.sh should run successfully in the pipeline if the workload identity federation is configured as required.
+Next, navigate to **Pipelines** > **OpenID Connect**. This screen will contain a value, **Audience**, which we will need to copy. The value in Audience needs to be included in our list within `terraform.tfvars`.
 
-### Pipeline Workflow Overview
-The complete workflow comprises of 4-5 stages and 2 before-script jobs
-  * setup terraform :
-    * This step should download the terraform from internet and keep that as an artifacts to be used in later stages 
-  * Stages:
-    * setup-terraform : Downloads the specified TF_VERSION and passes it as a binary to the next stages
-    * plan: Runs terraform plan and saves the plan and json version of the plan as artifacts, this depends on the branch
-    * policy-validate: Runs gcloud terraform vet against the terraform code with the constraints in the specified repository.
-    * apply: This is executed for specified list of branches, currently main/master
+A complete `terraform.tfvars` should resemble the following:
+
+```hcl
+folder = "folders/00000012345"
+
+billing_account = "018888-01888-ABC123"
+
+workspace = "bbworkspace"
+
+allowed_audiences = ["ari:cloud:bitbucket::workspace/000000ee-1111-11ae-bbbb-1111aeeee111", "ari:cloud:bitbucket::workspace/000000ee-2222-11ae-bbbb-2222affff111"]
+```
+
+Upon making any modifications, run the following in the root of the repo to plan the deployment.
+
+```bash
+terraform plan
+```
+After reviewing the proposed infrastructure changes, approve the deployment.
+```bash
+terraform apply -auto-approve
+```
 

@@ -20,18 +20,24 @@ A video tutorial covering how to set up the guardrails for Github can be found h
 
 # Getting started
 
-## Workload Identity federation 
-Workload identity federation enables applications running outside of Google Cloud to replace long-lived service account keys with short-lived access tokens. 
-This is achieved by configuring Google Cloud to trust an external identity provider, so applications can use the credentials issued by the external identity provider to impersonate a service account.
-
-If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
+## Overview
+This Runbook contains three repositories; project-factory, folder-factory, and skunkworks. The first two of these repositories do not need to be deployed inside of a traditional bitbucket pipeline. They will deploy the necessary components to establish a structure within GCP and set up a Workload Identity Federation (WIF) provider. The third repository, skunkworks, has an example bitbucket pipeline that will authenticate via the established WIF provider. 
 
 ### High Level Process
-* GCP
-  - Create a Workload Identity Pool
-  - Create a Workload Identity Provider
-  - Create a Service Account and grant permissions
- 
-* CICD tool
-  - Specify where the pipeline configuration file resides
-  - Configure variables to pass relevant information to GCP to genrate short-lived tokens
+  - **Deploy Folder Factory**
+      - Enter the Folder Factory directory
+      - Edit provider.tf to contain a backend. Using gcs is suggested by referencing an existing GCS bucket. Use the prefix variable to ensure folder-factory's state exist in a directory within the bucket.
+      - Add folder yaml files to /data/folders.
+      - Deploy via Terraform
+  - **Deploy Project Factory**
+      - Enter the Project Factory directory
+      - Edit provider.tf to contain a backend. Using gcs is suggested by referencing an existing GCS bucket. Use the prefix variable to ensure project-factory's state exist in a directory within the bucket.
+      - Within terraform.tfvars add the proper variables for folder (created with Folder Factory), billing account, Bitbucker Workspace, and allowed Audiences. If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
+      - Add project yaml files to /data/projects.
+      - Deploy via Terraform
+  - **Deploy Skunkworks**
+      - Enter the Skunkworks directory
+      - Edit provider.tf to contain a backend. Using gcs is suggested by referencing an existing GCS bucket. Use the prefix variable to ensure skunkworks' state exist in a directory within the bucket.
+      - Within terraform.tfvars add the proper variables for the project created in Project Factory
+      - Within the Bitbucket repository variables, add all the variables described within the Skunkworks README.md.
+      - Deploy Skunkworks via Bitbucket Pipeline. The pipeline will authenticate to GCP using the Workload Identity Pool created within Project Factory

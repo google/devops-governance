@@ -28,7 +28,7 @@ module "project" {
   repo_sub        = each.value.repo_branch
   repo_provider   = each.value.repo_provider
   billing_account = each.value.billing_account_id
-  folder          = var.folder
+  folder          = each.value.folder
   roles           = try(each.value.roles, [])
   wif-pool        = google_iam_workload_identity_pool.wif-pool-bitbucket.name
   depends_on      = [google_iam_workload_identity_pool.wif-pool-bitbucket]
