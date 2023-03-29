@@ -1,15 +1,14 @@
-pipeline {
-  
+pipeline {  
     agent any
      environment {
-    BUCKET_PATH = credentials('backend-path')
-    REPO_FULL_NAME = credentials('bucket-repo')
-    PROJECT_NAME = credentials('project-name')
-    GCP_PROJECT_NUMBER = credentials('project-id')
-    workload_identity_pool_id = credentials('wif_pool_id')
-    workload_identity_pool_provider_id = credentials('wif_pool_provider_id')
-    SERVICE_ACCOUNT_NAME = credentials('sa-name')
-
+    BUCKET_PATH                         = credentials('backend-path')
+    REPO_FULL_NAME                      = credentials('bucket-repo')
+    PROJECT_NAME                        = credentials('project-name')
+    GCP_PROJECT_NUMBER                  = credentials('project-id')
+    workload_identity_pool_id           = credentials('wif_pool_id')
+    workload_identity_pool_provider_id  = credentials('wif_pool_provider_id')
+    SERVICE_ACCOUNT_NAME                = credentials('sa-name')
+    policy_file_path                    = credentials('policy_file_path')
   }
     options {
     skipDefaultCheckout(true)
@@ -20,7 +19,7 @@ pipeline {
         cleanWs()
       }
     }
-          stage('WIF') {
+        stage('WIF') {
       steps {
           withCredentials([file(variable: 'ID_TOKEN_FILE', credentialsId: 'gcp')]) {
           writeFile file: "$WORKSPACE_TMP/creds.json", text: """
@@ -41,8 +40,7 @@ pipeline {
   sh '''
     gcloud auth login --brief --cred-file=$WORKSPACE_TMP/creds.json
   '''
-}
-       
+}    
       }
     }
        stage('checkout') {
@@ -50,21 +48,34 @@ pipeline {
         checkout scm
       }
     }
-        stage('Terraform') {
+        stage('Terraform Plan') {
             steps {
              
                sh '''
                  cd guardrails/folder-factory
                 terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=${REPO_FULL_NAME}" 
-                terraform plan
-                terraform apply -auto-approve
-                  
-              '''
-              
+                terraform plan -input=false -out ffjenkins.tfplan    
+              ''' 
             }
         }
-        
-       
+       stage('Terraform Validate') {
+            steps {
+               sh '''
+                 cd guardrails/folder-factory
+                 terraform show -json "ffjenkins.tfplan" > "ffjenkins.json" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "ffjenkins.json" --policy-library="${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                '''          
+            }
+        }
+       stage('Terraform Apply') {
+            steps {           
+               sh '''
+                 cd guardrails/folder-factory
+                terraform apply -auto-approve
+                '''             
+            }
+        }
     }   
 }
 
