@@ -1,11 +1,13 @@
-pipeline {
-  
+pipeline { 
     agent any
      environment {
-    BUCKET_PATH = credentials('backend-path')
-    SKUNKWORK_PROJECT = credentials('staging-project')
-    SW_PROJECT_NUMBER = credentials('sw-project-number')
-    SW_SERVICE_ACCOUNT = credentials('sw-sa')
+       BUCKET_PATH                               = credentials('backend-path')
+       SKUNKWORK_PROJECT                         = credentials('staging-project')
+       SW_PROJECT_NUMBER                         = credentials('sw-project-number')
+       SW_SERVICE_ACCOUNT                        = credentials('sw-sa')
+       SW_workload_identity_pool_id              = credentials('sw_wif_pool_id')
+       SW_workload_identity_pool_provider_id     = credentials('sw_wif_pool_provider_id')
+       policy_file_path                          = credentials('policy_file_path')
   }
     options {
     skipDefaultCheckout(true)
@@ -22,7 +24,7 @@ pipeline {
           writeFile file: "$WORKSPACE_TMP/sts_creds.json", text: """
     {
       "type": "external_account",
-      "audience": "//iam.googleapis.com/projects/${SW_PROJECT_NUMBER}/locations/global/workloadIdentityPools/jenkins-pool1-ad8aa16a/providers/jenkins-provider-ad8aa16a",
+      "audience": "//iam.googleapis.com/projects/${SW_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${SW_workload_identity_pool_id}/providers/${SW_workload_identity_pool_provider_id}",
       "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
       "token_url": "https://sts.googleapis.com/v1/token",
       "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${SW_SERVICE_ACCOUNT}@${SKUNKWORK_PROJECT}.iam.gserviceaccount.com:generateAccessToken",
@@ -40,26 +42,37 @@ pipeline {
 }
       }
            }
-
        stage('checkout') {
       steps {
         checkout scm
       }
     }
-        stage('Terraform') {
-            steps {
-             
+        stage('Terraform Plan') {
+            steps {             
                sh '''
                  cd guardrails/skunkworks
                 terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=prod-skunkworks" 
-                terraform plan -var="project=${SKUNKWORK_PROJECT}"
-                terraform apply -var="project=${SKUNKWORK_PROJECT}" -auto-approve
-                  
-              '''
-              
+                terraform plan -var="project=${SKUNKWORK_PROJECT}" -out swjenkins.tfplan                               
+              '''           
             }
         }
-        
-       
+        stage('Terraform Validate') {
+            steps {          
+               sh '''
+                 cd guardrails/skunkworks
+                 terraform show -json "swjenkins.tfplan" > "swjenkins.json" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${SW_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "swjenkins.json" --policy-library="${policy_file_path}" --project="${SW_PROJECT_NUMBER}" 
+                '''         
+            }
+        }
+       stage('Terraform Apply') {
+            steps {          
+               sh '''
+                 cd guardrails/skunkworks
+                terraform apply -var="project=${SKUNKWORK_PROJECT}" -auto-approve
+                '''          
+            }
+        }     
     }   
 }
