@@ -1,0 +1,1 @@
+This is an addon for the project module with connects one service account to one project and tie that Service account to IAM Role . IAM Role will have the Workspace ID on Terraform Cloud, which will ensure that only that specific workspace is allowed to be deploy to GCP.
