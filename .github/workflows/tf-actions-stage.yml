@@ -1,0 +1,151 @@
+# Copyright 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+name: SIT Environment POC
+on:
+  push:
+    branches:
+      - poc-stage
+env:
+  STATE_BUCKET: ${{ secrets.STATE_BUCKET }}
+  WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+  SERVICE_ACCOUNT: ${{ secrets.STAGE_SERVICE_ACCOUNT }}
+  TF_VAR_project: ${{ secrets.STAGE_PROJECT }}
+  TF_VAR_stage: 'stage'
+
+# OR SET MANUALLY
+#env:
+#  STATE_BUCKET: 'XXXX'
+#  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
+#  SERVICE_ACCOUNT: 'XXXX@XXXX'
+#  TF_VAR_project: 'XXXXXXX'
+
+jobs:
+  # Validate
+  validate:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: 'actions/checkout@v2'
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
+    - run: |-
+        cd ./examples/poc/
+        terraform init \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
+        terraform validate
+  
+  # Plan
+  plan:
+    needs: validate
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: 'actions/checkout@v2'
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
+    - run: |-
+        cd ./examples/poc/
+        terraform init \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
+        terraform plan -out tfplan.plan -var-file="config/stage.tfvars"
+    - name: 'Save Plan'
+      uses: actions/upload-artifact@v2
+      with:
+        name: tfplan.plan
+        path: ./examples/poc/tfplan.plan
+
+  # Deploy
+  deploy:
+    needs: plan
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    # Add "id-token" with the intended permissions.
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - uses: 'actions/checkout@v2'
+
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        token_format: 'access_token'
+        WORKLOAD_IDENTITY_PROVIDER: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
+        SERVICE_ACCOUNT: ${{ env.SERVICE_ACCOUNT }}
+        access_token_lifetime: '300s' # optional, default: '3600s' (1 hour)
+
+    # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+    - id: 'tfsetup'
+      name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: tfplan.plan
+        path: ./examples/poc/
+
+    - run: |-
+        cd ./examples/poc/
+        terraform init \
+          -backend-config="bucket=$STATE_BUCKET" \
+          -backend-config="prefix=$GITHUB_REPOSITORY/$TF_VAR_stage" 
+        terraform apply -auto-approve tfplan.plan

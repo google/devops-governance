@@ -1,0 +1,49 @@
+stages:
+  - triggers
+
+variables:
+  STATE_BUCKET: $STATE_BUCKET
+  GCP_WORKLOAD_IDENTITY_PROVIDER: $GCP_WORKLOAD_IDENTITY_PROVIDER
+  TF_VERSION: $TF_VERSION
+  TF_LOG: $TF_LOG
+  TF_ROOT: $TF_ROOT
+  TERRAFORM_POLICY_VALIDATE: $TERRAFORM_POLICY_VALIDATE
+  POLICY_LIBRARY_REPO : $POLICY_LIBRARY_REPO
+
+
+trigger_dev:
+  variables:
+    GCP_PROJECT_ID: $DEV_GCP_PROJECT_ID
+    GCP_SERVICE_ACCOUNT: $DEV_GCP_SERVICE_ACCOUNT
+    ENVIRONMENT: dev
+  stage: triggers
+  trigger:
+    include: .gitlab/workflows/workflow.yml
+    strategy: depend
+  only:
+    - dev
+    
+trigger_staging:
+  stage: triggers
+  variables:
+    GCP_PROJECT_ID: $STAGE_GCP_PROJECT_ID
+    GCP_SERVICE_ACCOUNT: $STAGE_GCP_SERVICE_ACCOUNT
+    ENVIRONMENT: staging
+  trigger:
+    include: .gitlab/workflows/workflow.yml
+    strategy: depend
+  only:
+    - staging
+
+trigger_prod:
+  stage: triggers
+  variables:
+    GCP_PROJECT_ID: $PROD_PROJECT_ID
+    GCP_SERVICE_ACCOUNT: $PROD_GCP_SERVICE_ACCOUNT
+    ENVIRONMENT: prod
+  trigger:
+    include: .gitlab/workflows/workflow.yml
+    strategy: depend
+  only:
+    - prod
+    

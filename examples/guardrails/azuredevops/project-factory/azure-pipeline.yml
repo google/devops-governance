@@ -1,0 +1,146 @@
+name: "$(Date:yyyyMMdd)$(Rev:.r)"
+
+trigger:
+  branches:
+    include:
+      - none
+
+
+variables:
+  azureserviceconnection: "service connection name between azure devops and gcp"
+  projectID: "gcp project ID"
+  workloadIdentityPoolProvider: "pool provider in gcp wif"
+  Projectnumber: "gcp project no"
+  serviceaccount: "sa in gcp"
+  workloadIdentityPools: "pool in gcp wif"
+  policyValidate: "true/false"
+
+
+pool:
+  vmImage: "ubuntu-latest"
+
+
+stages:
+  - stage: auth
+    displayName: "GCP WIF Auth"
+    jobs:
+      - job: governance_pipeline_azure
+        timeoutInMinutes: 30
+        steps:
+          - task: charleszipp.azure-pipelines-tasks-terraform.azure-pipelines-tasks-terraform-installer.TerraformInstaller@0
+            displayName: "Install Terraform"
+            inputs:
+              terraformVersion: "latest"
+
+ # AzureCLI task to retrieve an Azure token for the Service Principal and then exchanges it against a Service Account token using Workload Identity Federation
+          - task: AzureCLI@2
+            displayName: "Get access token"
+            inputs:
+              azureserviceconnection: "$(azureserviceconnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              inlineScript: |
+                SUBJECT_TOKEN_TYPE="urn:ietf:params:oauth:token-type:jwt"
+                SUBJECT_TOKEN=$(az account get-access-token --query accessToken --output tsv)
+                STS_TOKEN=$(curl --silent -0 -X POST https://sts.googleapis.com/v1/token \
+                    -H "Content-Type: text/json; charset=utf-8" \
+                    -d @- <<EOF | jq -r .access_token
+                    {
+                        "audience": "//iam.googleapis.com/projects/$(Projectnumber)/locations/global/workloadIdentityPools/$(workloadIdentityPoolProvider)/providers/$(workloadIdentityPoolProvider)",
+                        "grantType": "urn:ietf:params:oauth:grant-type:token-exchange",
+                        "requestedTokenType": "urn:ietf:params:oauth:token-type:access_token",
+                        "scope": "https://www.googleapis.com/auth/cloud-platform",
+                        "subjectTokenType": "$SUBJECT_TOKEN_TYPE",
+                        "subjectToken": "$SUBJECT_TOKEN"
+                    }
+                EOF
+                )
+                echo $STS_TOKEN
+                ACCESS_TOKEN=$(curl --silent -0 -X POST https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/$(serviceaccount)@$(projectID).iam.gserviceaccount.com:generateAccessToken \
+                    -H "Content-Type: text/json; charset=utf-8" \
+                    -H "Authorization: Bearer $STS_TOKEN" \
+                    -d @- <<EOF | jq -r .accessToken
+                    {
+                        "scope": [ "https://www.googleapis.com/auth/cloud-platform" ]
+                    }
+                EOF
+                )
+                
+                echo "##vso[task.setvariable variable=ACCESS_TOKEN]$ACCESS_TOKEN"
+                echo $ACCESS_TOKEN
+            
+
+          - task: AzureCLI@2
+            displayName: "Terraform plan"
+            inputs:
+              azureserviceconnection: "$(azureserviceconnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              workingDirectory: "examples/guardrails/project-factory"
+              inlineScript: |
+                
+                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
+                gcloud config set project $(projectID)
+
+                terraform init
+              
+                terraform plan -out=test.tfplan
+
+                terraform show -json ./test.tfplan > ./tfplan.json
+                
+          - task: AzureCLI@2
+            displayName: "Policy Validate"
+            condition: eq(variables.policyValidate,'true')
+            inputs:
+              azureserviceconnection: "$(azureserviceconnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              workingDirectory: "examples/guardrails/project-factory"
+              inlineScript: |
+                
+                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
+                gcloud config set project $(projectID)  
+
+                echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+                curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+                sudo apt-get update 
+                sudo apt-get install -y google-cloud-sdk-terraform-tools
+
+                git clone https://github.com/GoogleCloudPlatform/policy-library.git ./policy-library
+
+                cd ./policy-library 
+                #&& cp samples/iam_service_accounts_only.yaml policies/constraints
+
+                gcloud beta terraform vet ../tfplan.json --policy-library=. --format=json
+                violations=$(gcloud beta terraform vet ../tfplan.json --policy-library=. --format=json)
+                ret_val=$?
+                if [ $ret_val -eq 2 ]; then
+                  echo "$violations"
+                  echo "Violations found, not proceeding with terraform apply"
+                exit 1
+                elif [ $ret_val -ne 0 ]; then
+                  echo "Error during gcloud beta terraform vet; not proceeding with terraform apply"
+                  exit 1
+                else
+                  echo "No policy violations detected; proceeding with terraform apply"
+                fi 
+
+          - task: AzureCLI@2
+            displayName: "Terraform apply"
+            inputs:
+              azureserviceconnection: "$(azureserviceconnection)"
+              scriptType: "bash"
+              scriptLocation: "inlineScript"
+              workingDirectory: "examples/guardrails/project-factory"
+              inlineScript: |
+                
+                export GOOGLE_OAUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export CLOUDSDK_AUTH_ACCESS_TOKEN=$ACCESS_TOKEN
+                export GOOGLE_IMPERSONATE_SERVICE_ACCOUNT=$(serviceaccount)@$(projectID).iam.gserviceaccount.com 
+                gcloud config set project $(projectID) 
+                terraform apply -auto-approve ./test.tfplan 

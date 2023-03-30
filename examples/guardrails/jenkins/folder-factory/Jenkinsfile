@@ -1,0 +1,81 @@
+pipeline {  
+    agent any
+     environment {
+    BUCKET_PATH                         = credentials('backend-path')
+    REPO_FULL_NAME                      = credentials('bucket-repo')
+    PROJECT_NAME                        = credentials('project-name')
+    GCP_PROJECT_NUMBER                  = credentials('project-id')
+    workload_identity_pool_id           = credentials('wif_pool_id')
+    workload_identity_pool_provider_id  = credentials('wif_pool_provider_id')
+    SERVICE_ACCOUNT_NAME                = credentials('sa-name')
+    policy_file_path                    = credentials('policy_file_path')
+  }
+    options {
+    skipDefaultCheckout(true)
+  }
+    stages {
+      stage('clean workspace') {
+      steps {
+        cleanWs()
+      }
+    }
+        stage('WIF') {
+      steps {
+          withCredentials([file(variable: 'ID_TOKEN_FILE', credentialsId: 'gcp')]) {
+          writeFile file: "$WORKSPACE_TMP/creds.json", text: """
+    {
+      "type": "external_account",
+      "audience": "//iam.googleapis.com/projects/${GCP_PROJECT_NUMBER}/locations/global/workloadIdentityPools/${workload_identity_pool_id}/providers/${workload_identity_pool_provider_id}",
+      "subject_token_type": "urn:ietf:params:oauth:token-type:jwt",
+      "token_url": "https://sts.googleapis.com/v1/token",
+      "service_account_impersonation_url": "https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${SERVICE_ACCOUNT_NAME}@${PROJECT_NAME}.iam.gserviceaccount.com:generateAccessToken",
+      "credential_source": {
+        "file": "$ID_TOKEN_FILE",
+        "format": {
+          "type": "text"
+        }
+      }
+    }
+  """
+  sh '''
+    gcloud auth login --brief --cred-file=$WORKSPACE_TMP/creds.json
+  '''
+}    
+      }
+    }
+       stage('checkout') {
+      steps {
+        checkout scm
+      }
+    }
+        stage('Terraform Plan') {
+            steps {
+             
+               sh '''
+                 cd guardrails/folder-factory
+                terraform init -backend-config="bucket=${BUCKET_PATH}" -backend-config="prefix=${REPO_FULL_NAME}" 
+                terraform plan -input=false -out ffjenkins.tfplan    
+              ''' 
+            }
+        }
+       stage('Terraform Validate') {
+            steps {
+               sh '''
+                 cd guardrails/folder-factory
+                 terraform show -json "ffjenkins.tfplan" > "ffjenkins.json" 
+                gcloud source repos clone gcp-policies "${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                gcloud beta terraform vet "ffjenkins.json" --policy-library="${policy_file_path}" --project="${GCP_PROJECT_NUMBER}" 
+                '''          
+            }
+        }
+       stage('Terraform Apply') {
+            steps {           
+               sh '''
+                 cd guardrails/folder-factory
+                terraform apply -auto-approve
+                '''             
+            }
+        }
+    }   
+}
+
