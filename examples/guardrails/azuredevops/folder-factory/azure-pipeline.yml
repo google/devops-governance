@@ -7,7 +7,7 @@ trigger:
 
 
 variables:
-  azureserviceconnection: "service connection name between azure devops and gcp"
+  azureSubscription: "<service_connection_name>"
   projectID: "gcp project ID"
   workloadIdentityPoolProvider: "pool provider in gcp wif"
   Projectnumber: "gcp project no"
@@ -36,7 +36,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Get access token"
             inputs:
-              azureserviceconnection: "$(azureserviceconnection)"
+              azureSubscription: "$(azureSubscription)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               inlineScript: |
@@ -73,7 +73,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Terraform plan"
             inputs:
-              azureserviceconnection: "$(azureserviceconnection)"
+              azureSubscription: "$(azureSubscription)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"
@@ -94,7 +94,7 @@ stages:
             displayName: "Policy Validate"
             condition: eq(variables.policyValidate,'true')
             inputs:
-              azureserviceconnection: "$(azureserviceconnection)"
+              azureSubscription: "$(azureSubscription)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"
@@ -133,7 +133,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Terraform apply"
             inputs:
-              azureserviceconnection: "$(azureserviceconnection)"
+              azureSubscription: "$(azureSubscription)"
               scriptType: "bash"
               scriptLocation: "inlineScript"
               workingDirectory: "examples/guardrails/folder-factory"

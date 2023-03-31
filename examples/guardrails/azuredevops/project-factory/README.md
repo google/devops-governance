@@ -68,32 +68,46 @@ From the project-factory  repo
 CICD configuration file path 
 Navigate to the azure-pipeline.yml file 
 
-CI/CD variables
-Add the variables to the pipeline as described in the table below. 
+This is a YAML file for Azure DevOps that sets up a CI/CD pipeline for deploying infrastructure changes to Google Cloud Platform (GCP) using Terraform. It leverages Workload Identity Federation for authentication and integrates with Google Cloud's Policy Library for enforcing infrastructure policies. Let me break down the pipeline components:
 
-### Terraform config validator
-The pipeline has an option to utilise the integrated config validator (gcloud terraform vet) to impose constraints on your terraform configuration. You can enable it by setting the CI/CD Variable $TERRAFORM_POLICY_VALIDATE to "true" and providing the policy-library repo URL to $POLICY_LIBRARY_REPO variable. See the below for details on the Variables to be set on the CI/CD pipeline.
+1.  `name: "$(Date:yyyyMMdd)$(Rev:.r)"`: Sets the pipeline's name with a date and revision pattern. This provides a unique identifier for each pipeline run.
+1.  `trigger`: Specifies that the pipeline should  be triggered manually or will  be automatically triggered by any changes to the repository.
+1.  `variables`: Defines several variables to be used throughout the pipeline, such as the project ID, service account, and policy validation flag.
+1.  `pool`: Specifies the build agent image to be used for running the pipeline tasks. In this case, the image is "ubuntu-latest", which is a frequently updated Ubuntu-based image.
+1.  `stages`:
+    -   `stage: auth`: The stage for GCP Workload Identity Federation (WIF) authentication. This stage contains a single job with multiple tasks.
+        -   `job: governance_pipeline_azure`: The main job of the pipeline, with a 30-minute timeout. This job contains several tasks to be executed sequentially.
+            1.  `task: TerraformInstaller`: Installs the latest version of Terraform, a tool for provisioning and managing infrastructure as code. Terraform will be used in later tasks to plan and apply changes to GCP resources.
+            1.  `task: Get access token`: Retrieves an Azure access token for the service principal configured in the Azure Subscription. This token is exchanged for a GCP access token using Workload Identity Federation, which allows for seamless authentication across cloud providers. The GCP access token is then stored as an environment variable called `ACCESS_TOKEN`.
+            1.  `task: Terraform plan`: Initializes Terraform in the specified working directory and runs a Terraform plan. This plan calculates the changes required to achieve the desired infrastructure state as defined in the Terraform configuration files. The plan is saved to a file called `test.tfplan`, and its JSON representation is written to `tfplan.json`.
+            1.  `task: Policy Validate`: Validates the Terraform plan against a policy library, which contains rules and constraints for allowed infrastructure configurations. If any violations are detected, the pipeline will fail and not proceed to the next task. This step ensures that only compliant infrastructure changes are applied.
+            1.  `task: Terraform apply`: Applies the Terraform plan if there are no policy violations. This step will create, update, or delete GCP resources as required to achieve the desired infrastructure state as defined in the Terraform configuration files.
 
-| Variable                       | Description                                                                                                                                              | Sample value                                                                                                    |
-|--------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| GCP_PROJECT_ID                 | The GCP project ID of your service account                                                                                                               | sample-project-1122                                                                                             |
-| GCP_SERVICE_ACCOUNT            | The Service Account to be used for creating projects                                                                                                      | xyz@sample-project-1122.iam.gserviceaccount.com                                                                 |
-| GCP_WORKLOAD_IDENTITY_PROVIDER | The Workload Identity provider URI configured with the Service Account and the repository                                                                | projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_NAME}/providers/${PROVIDER_NAME} |
-| STATE_BUCKET                   | The GCS bucket in which the state is to be centrally managed. The Service account provided above must have access to list and write files to this bucket | sample-terraform-state-bucket                                                                                   |
-| TF_LOG                         | The terraform env variable setting to get detailed logs.  Supports TRACE,DEBUG,INFO,WARN,ERROR in order of decreasing verbosity                          | WARN                                                                                                            |
-| TF_ROOT                        | The directory of the terraform code to be executed.                                         | $CI_PROJECT_DIR                                                                                                 |
-| TF_VERSION                     | The terraform version to be used for execution. The specified terraform version is downloaded and used for execution for the workflow.                   | 1.3.6  |
-| TERRAFORM_POLICY_VALIDATE                         | Set this value as true if terraform vet is to be run against the policy library repository set in $POLICY_LIBRARY_REPO variable                          | true                                                                                                           |
-| POLICY_LIBRARY_REPO                         | The policy library repository URL which will be cloned using git clone to run gcloud terraform vet against.                          | https://github.com/GoogleCloudPlatform/policy-library                                                                                                          |
+This pipeline is designed to deploy GCP infrastructure using Terraform with Azure DevOps while incorporating authentication via Workload Identity Federation and policy enforcement through Google Cloud's Policy Library. The pipeline follows a series of steps, including authentication, Terraform initialization, planning, policy validation, and finally, applying the infrastructure changes if no policy violations are detected.
+
+* CI/CD variables
+    
+    Add the variables to the pipeline as described in the table below. 
+
+  
+ ```
+azureSubscription: "<service connection name between azure devops and gcp>"
+projectID: "<gcp project>"
+workloadIdentityPoolProvider: "<pool provider in gcp wif>"
+Projectnumber: "<gcp project no>"
+serviceaccount: "<sa in gcp>"
+workloadIdentityPools: "<pool in gcp wif>"
+policyValidate: "<true/false>"
+``` 
 
 Similar to Folder factory, 
 
 Once the prerequisites are set up, manually trigger the pipeline.  
 
-.gcp-auth script should run successfully in the pipeline if the workload identity federation is configured as required.
+gcp auth script should run successfully in the pipeline if the workload identity federation is configured as required.
 
 ### Pipeline Workflow Overview
-The complete workflow comprises of 4-5 stages and 2 before-script jobs
+
 * Stages:
   * gcp-auth : creates the wif credentials by impersonating the service account.
   * terraform init : initializes terraform in the specified TF_ROOT directory
