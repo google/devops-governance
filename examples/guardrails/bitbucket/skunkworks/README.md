@@ -1,29 +1,30 @@
-# Skunkworks - IaC Kickstarter Template
+# Skunkworks - Bitbucket Pipelines Terraform Example with Workload Identity Federation
 
-This is a template for an IaC kickstarter repository.
+This is a template for an IaC Terraform repository that includes a Bitbucket pipeline that authenticates via Workload Identity Federation. It is intended to be run after folder-factory and project-factory.
 
 ![Skunkworks](https://user-images.githubusercontent.com/94000358/169810982-36f01de2-e5e5-4ecd-b98e-3cf5a6aa9f81.png)
 
-The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github. 
 
-This template creates a bucket in the specified target environment.
+
+This is simple repository that only deploys a GCS bucket into a specified project. The point of this project is to prove that Terraform can be deployed to Bitbucket via Workload Identity Federation. 
 
 ## Repository Configuration
-This repository does not need any additional runners (uses Github runners) and does require you to previously setup Workload Identity Federation to authenticate.
 
-If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
+1. Clone this repository and push it to your own Bitbucket repository.
+1. Enable pipelines in your Bitbucket Repository. This is done in **Repository Settings** > **Pipelines** > **Settings**.
+2. Set up the required environment variables in your Bitbucket repository settings. This is done in **Repository Settings** > **Pipelines** > **Repository variables**.
 
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
+   | Environment Variable            | Description                                                                       | Example Value                                               |
+   |---------------------------------|-----------------------------------------------------------------------------------|-------------------------------------------------------------|
+   | `TERRAFORM_VERSION`             | The version of Terraform you want to use                                          | `1.4.2`                                                   |
+   | `STATE_BUCKET`                   | The Google Cloud Storage bucket where your Terraform state files will be stored | `my-terraform-state-bucket`                              |
+   | `GCP_WORKLOAD_IDENTITY_PROVIDER`| The fully qualified identifier of your Google Cloud Workload Identity Provider *(See **project-factory** outputs)* | `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID` |
+   | `GCP_SERVICE_ACCOUNT`           | The email address of your Google Cloud Service Account *(See **project-factory** outputs)* | `my-service-account@my-project.iam.gserviceaccount.com` |
+   | `PROJECT_NAME`                  | Your Google Cloud project ID *(See **project-factory** outputs)* | `my-gcp-project`                                             |
+   | `TERRAFORM_POLICY_VALIDATE`     |  | `true`|
+1. add a `terraform.tfvars` that specifies the project you want the bucket to be created in
+    ```hcl
+    project = "my-gcp-project"
+    ```
+1. Commit to your repository to trigger a build
 
-<img width="787" alt="Secret configuration" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
-
-or by modifing the [Workflow Action Files](.github/workflows/) and setting the environment variables:
-```
-env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
-```

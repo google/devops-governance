@@ -41,7 +41,7 @@ resource "google_iam_workload_identity_pool_provider" "wif-provider-bitbucket" {
     "attribute.branch_name" = "assertion.branchName"
   }
   oidc {
-    issuer_uri        = var.issuer_uri
+    issuer_uri        = "https://api.bitbucket.org/2.0/workspaces/${var.workspace}/pipelines-config/identity/oidc"
     allowed_audiences = var.allowed_audiences
   }
   depends_on = [

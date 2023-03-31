@@ -1,59 +1,62 @@
 # Folder Factory
+--------------
 
-This is a template for a DevOps folder factory.
+folder-factory will deploy the folders and establish the organizational hierarchy. Inside the repo is a subdirectory of data/folders that contain yaml files. Each yaml file contains a new folder definition.
 
-It can be used with [https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory](https://github.com/google/devops-governance/tree/main/examples/guardrails/project-factory) and is intended to house the folder configurations:
+## Deployment:
 
-![Screenshot 2022-05-10 12 00 19 PM](https://user-images.githubusercontent.com/94000358/169809437-aaa8538e-3ffc-48b3-9028-84e4995de150.png)
+#### Authentication
 
-Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
+folder-factory should be deployed outside of the normal pipeline process. Workload Identity Federation, which will authorize bitbucket pipelines to communicate with GCP, will not be configured until after the project-factory is deployed.
 
-The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github.
+Since this is being deployed outside of the pipeline environment, authentication will need to be established separately. If running locally, this can be done with:
 
-## Repository Configuration
-This repository does not need any additional runners (uses Github runners) and does require you to previously setup Workload Identity Federation to authenticate.
-
-If you do require additional assitance to setup Workload Identity Federation have a look at: https://www.youtube.com/watch?v=BuyoENMmtVw
-
-After setting up WIF you can then go ahead and configure this repository. This can be done by either with setting the following secrets:
-
-<img width="787" alt="Secret configuration" src="https://user-images.githubusercontent.com/94000358/161538148-5b5a5047-b512-4d5a-9a95-912eb4f8a138.png">
-
-or by modifing the [Workflow Action](.github/workflows/terraform-deployment.yml) and setting the environment variables:
 ```
-env:
-  STATE_BUCKET: 'XXXX'
-  # The GCS bucket to store the terraform state 
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/XXXX'
-  # The workload identity provider that should be used for this repository.
-  SERVICE_ACCOUNT: 'XXXX@XXXX'
-  # The service account that should be used for this repository.
+gcloud  auth  login
 ```
 
-## Setting up folders
+Alternatively, CloudShell can be used for an easy environment that is already GCP authenticated.
 
-The folder factory will:
-- create a folders with defined organisational policies
+The authenticated user should have permissions in GCP IAM to create folders. If desired, a Service Account may be used that has the required permissions. See [Impersonating Service Accounts](https://cloud.google.com/iam/docs/impersonating-service-accounts) for more information.
 
-It uses YAML configuration files for every folder with the following sample structure:
+#### Terraform
+
+After authentication, the terraform can be deployed. Navigate to the root of the folder-factory repository and initialize the terraform.
+
 ```
-parent: folders/XXXXXXXXX
-org_policies:
-  policy_boolean:
-    constraints/compute.disableGuestAttributesAccess: true
-    constraints/iam.disableServiceAccountCreation: false
-    constraints/iam.disableServiceAccountKeyCreation: false  
-    constraints/iam.disableServiceAccountKeyUpload: false
-    constraints/gcp.disableCloudLogging: false 
-  policy_list:
-    constraints/compute.vmExternalIpAccess:
-      inherit_from_parent: null
-      status: true
-      suggested_value: null
-      values:
-iam:
-  roles/resourcemanager.projectCreator:
-    - serviceAccount:XXXXX@XXXXXX
+cd  folder-factory
 ```
 
-Every folder is defined with its own yaml file located in the following [Folder](data/folders).
+Before Terraform can be initialized, Terraform needs to be directed on where to store the state file within Google Cloud Storage. Open the file named providers.tf and populate values for bucket and prefix. The modified file should resemble the following:
+
+```
+terraform  {
+  backend  "gcs"  {
+    bucket  =  "your-bucket-name"
+    prefix  =  "path/to/state/file/"
+  }
+}
+#  ...
+```
+
+After this change is made, Terraform can be initialized.
+
+```
+terraform  init
+```
+
+This is when to add, change, or modify any of the yaml files in the data/folders directory. See sample yaml provided for details. Each yaml file contains the definition of a new GCP folder.
+
+Upon making any modifications, run the following to plan the deployment.
+
+```
+terraform  plan
+```
+
+After reviewing the proposed infrastructure changes, approve the deployment.
+
+```
+terraform  apply  -auto-approve
+```
+
+Folders should now be deployed into your GCP environment

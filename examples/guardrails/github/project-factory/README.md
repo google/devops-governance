@@ -2,13 +2,13 @@
 
 This is a template for a DevOps project factory.
 
-It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/folder-factory) and is intended to house the projects of a specified folder:
+It can be used with https://github.com/google/devops-governance/tree/main/examples/guardrails/github/folder-factory (https://github.com/google/devops-governance/tree/main/examples/guardrails/github/folder-factory) and is intended to house the projects of a specified folder:
 
 <img width="1466" alt="Overview" src="https://user-images.githubusercontent.com/94000358/161531177-23a99468-1e7b-4583-a243-624ee4663506.png">
 
-Using Keyless Authentication the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
+Using Keyless Authentication, the project factory connects a defined Github repository with a target service account and project within GCP for IaC.
 
-![Folder Factory](https://user-images.githubusercontent.com/94000358/169809882-f5ff9fb1-d037-49de-8c2c-bf0d457b662f.png)
+<img width="1019" alt="Screenshot 2023-03-10 at 03 09 10" src="https://user-images.githubusercontent.com/94000358/224206092-34dd7a43-b34a-474c-9a76-4877ca700cbd.png">
 
 The idea is to enable developers of the "skunkworks" repository to deploy into the "skunkworks" project via IaC pipelines on Github.
 

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 locals {
   folders = {
     for f in fileset("./data/folders", "**/*.yaml") :
@@ -22,11 +22,11 @@ locals {
 }
 
 module "folder" {
-  source          = "./modules/folder"
-  for_each        = local.folders
-  name            = each.key
-  parent          = each.value.parent
-  policy_boolean  = try(each.value.org_policies.policy_boolean, {})
-  policy_list     = try(each.value.org_policies.policy_list, {})
-  iam             = try(each.value.iam, {})
+  source         = "./modules/folder"
+  for_each       = local.folders
+  name           = each.key
+  parent         = each.value.parent
+  policy_boolean = try(each.value.org_policies.policy_boolean, {})
+  policy_list    = try(each.value.org_policies.policy_list, {})
+  iam            = try(each.value.iam, {})
 }

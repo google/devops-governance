@@ -38,9 +38,9 @@ resource "google_service_account_iam_member" "sa-iam" {
 }
 
 resource "google_project_iam_member" "sa-project" {
-  for_each = toset(var.roles)
-  role    = each.value
-  member  = "serviceAccount:${google_service_account.sa.email}"
-  project = module.project.project_id
+  for_each   = toset(var.roles)
+  role       = each.value
+  member     = "serviceAccount:${google_service_account.sa.email}"
+  project    = module.project.project_id
   depends_on = [google_service_account.sa]
 }

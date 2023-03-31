@@ -12,12 +12,10 @@ To use Azure Devops with GCP Deployments, we can leverage on [Workload Identity 
 
 ## ADO Prerequisites
 
-
 -   Create a Project in ADO
--   Add a repo called "folder factory" and copy code from [devops folder factory repo](https://github.com/google/devops-governance/tree/GDC-phase-kickstarter-1/examples/guardrails/azuredevops/folder-factory) into it
--   Add repo called "project factory" and copy code from [devops project factory repo](https://github.com/google/devops-governance/tree/GDC-phase-kickstarter-1/examples/guardrails/azuredevops/project-factory) into it
--   Add a repo called "skunkworks" and copy code from [devops skunkworks repo](https://github.com/google/devops-governance/tree/GDC-phase-kickstarter-1/examples/guardrails/azuredevops/skunkworks) into it.
+-   Add a repo called "folder factory" and copy code from [devops folder factory repo](../../../examples/guardrails/azuredevops/folder-factory) into it
+-   Add repo called "project factory" and copy code from [devops project factory repo](../../../examples/guardrails/azuredevops/project-factory) into it
+-   Add a repo called "skunkworks" and copy code from [devops skunkworks repo](../../../examples/guardrails/azuredevops/skunkworks) into it.
 
 > .\
-Once ADO set is completed go to [Folder Factory](https://github.com/google/devops-governance/blob/GDC-phase-kickstarter-1/examples/guardrails/azuredevops/folder-factory)
-
+Once ADO set is completed go to [Folder Factory](../../../examples/guardrails/azuredevops/folder-factory)

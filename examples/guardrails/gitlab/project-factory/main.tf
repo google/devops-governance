@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 locals {
   projects = {
     for f in fileset("./data/projects", "**/*.yaml") :
@@ -31,5 +31,5 @@ module "project" {
   folder          = var.folder
   roles           = try(each.value.roles, [])
   wif-pool        = each.value.repo_provider == "gitlab" ? google_iam_workload_identity_pool.wif-pool-gitlab.name : google_iam_workload_identity_pool.wif-pool-github.name
-  depends_on      = [google_iam_workload_identity_pool.wif-pool-github,google_iam_workload_identity_pool.wif-pool-gitlab]
+  depends_on      = [google_iam_workload_identity_pool.wif-pool-github, google_iam_workload_identity_pool.wif-pool-gitlab]
 }

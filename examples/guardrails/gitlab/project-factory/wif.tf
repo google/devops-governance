@@ -22,7 +22,7 @@ module "wif-project" {
   source          = "./modules/project"
   name            = "wif-prj-${random_id.rand.hex}"
   parent          = var.folder
-  billing_account = "01B3B2-962224-4EEC67"
+  billing_account = var.billing_account
 }
 
 resource "google_iam_workload_identity_pool" "wif-pool-gitlab" {
@@ -36,9 +36,9 @@ resource "google_iam_workload_identity_pool_provider" "wif-provider-gitlab" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.wif-pool-gitlab.workload_identity_pool_id
   workload_identity_pool_provider_id = "gitlab-provider-${random_id.rand.hex}"
   project                            = module.wif-project.project_id
-  attribute_mapping                  = {
+  attribute_mapping = {
     "google.subject" = "assertion.sub"
-    "attribute.sub" = "assertion.sub"
+    "attribute.sub"  = "assertion.sub"
   }
   oidc {
     issuer_uri        = "https://gitlab.com/"
@@ -57,12 +57,12 @@ resource "google_iam_workload_identity_pool_provider" "wif-provider-github" {
   workload_identity_pool_id          = google_iam_workload_identity_pool.wif-pool-github.workload_identity_pool_id
   workload_identity_pool_provider_id = "github-provider-${random_id.rand.hex}"
   project                            = module.wif-project.project_id
-  attribute_mapping                  = {
-    "google.subject" = "assertion.sub"
-    "attribute.sub" = "assertion.sub"
+  attribute_mapping = {
+    "google.subject"  = "assertion.sub"
+    "attribute.sub"   = "assertion.sub"
     "attribute.actor" = "assertion.actor"
   }
   oidc {
-    issuer_uri        = "https://token.actions.githubusercontent.com"
+    issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }

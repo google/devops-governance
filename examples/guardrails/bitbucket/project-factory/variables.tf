@@ -19,7 +19,7 @@ variable "folder" {
 
 variable "billing_account" {
 }
-variable "issuer_uri" {
+variable "workspace" {
 }
 
 variable "allowed_audiences" {
