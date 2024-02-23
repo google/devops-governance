@@ -1,0 +1,20 @@
+steps:
+  - name: gcr.io/cloud-builders/git
+    env:
+      - _INSTANCE_URL=$_INSTANCE_URL
+      - _REPO_NAME=$_REPO_NAME
+    script: >
+      #!/bin/sh
+
+
+      git config --global credential.'https://*.*.sourcemanager.dev'.helper
+      gcloud.sh
+
+      git config --global credential.'$_INSTANCE_URL'.helper gcloud.sh
+
+      git clone $_INSTANCE_URL/cloud-professional-services/$_REPO_NAME.git
+      /workspace/
+
+      cd /workspace
+
+      ls -ltrh
