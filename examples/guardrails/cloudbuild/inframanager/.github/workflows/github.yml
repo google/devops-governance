@@ -13,6 +13,9 @@ on:
 env:
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
   SERVICE_ACCOUNT: ${{ secrets.DEV_SERVICE_ACCOUNT }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  LOCATION: ${{ secrets.LOCATION }}
+
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -40,5 +43,5 @@ jobs:
       run: 'ls -ltrh'
       
     - id : 'Infrastructure-Manager-Deployment'
-      run: 'gcloud infra-manager deployments apply projects/<project_id>/locations/us-central1/deployments/inframanager     --service-account ${{ env.SERVICE_ACCOUNT }}     --local-source="."'
+      run: 'gcloud infra-manager deployments apply projects/${{ env.PROJECT_ID }}/locations/${{ env.LOCATION }}/deployments/inframanager     --service-account ${{ env.SERVICE_ACCOUNT }}     --local-source="."'
     
