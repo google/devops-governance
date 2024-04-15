@@ -33,6 +33,10 @@ resource "google_secret_manager_secret" "secret-basic" {
     label = var.label
   }
 
+  replication {
+    auto {}
+  }
+
   depends_on = [google_project_service.secret-manager]
 }
 
