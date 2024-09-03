@@ -138,7 +138,7 @@ jobs:
       with:
         cli_config_credentials_token: ${{ steps.auth.outputs.access_token }}
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: tfplan.plan
         path: ./examples/poc/
